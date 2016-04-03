@@ -1,0 +1,39 @@
+<footer class="site-footer">
+
+  <div class="wrapper">
+
+     <!--<h2 class="footer-heading">{{ site.title }}</h2>-->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li><a href="http://stackexchange.com/users/2897023"><img src="http://stackexchange.com/users/flair/2897023.png?theme=clean" alt="Profile for theindigamer on Stack Exchange, a network of free, community-driven Q&amp;A sites" title="Profile for theindigamer on Stack Exchange, a network of free, community-driven Q&amp;A sites" height="58" width="208"></a></li>
+          <!--<li>{{ site.title }}</li>
+          <li><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>-->
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          {% if site.github_username %}
+          <li>
+            {% include icon-github.html username=site.github_username %}
+          </li>
+          {% endif %}
+
+          {% if site.twitter_username %}
+          <li>
+            {% include icon-twitter.html username=site.twitter_username %}
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>{{ site.description }}</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
