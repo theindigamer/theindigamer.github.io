@@ -14,8 +14,8 @@ tags:
 [gradcafe]:          http://forum.thegradcafe.com/
 [ets]:               https://www.ets.org
 [anki]:              http://ankisrs.net/
-[srs]:               https://en.wikipedia.org/wiki/Spaced_repetition
-[flashcard]:         https://en.wikipedia.org/wiki/Flashcard
+[wiki-srs]:          https://en.wikipedia.org/wiki/Spaced_repetition
+[wiki-flashcard]:    https://en.wikipedia.org/wiki/Flashcard
 [ankiessentials]:    https://alexvermeer.com/anki-essentials/
 [grephysics]:        https://www.ets.org/gre/subject/about/content/physics/
 [apareasons]:        http://apa.org/gradpsych/2012/11/right-path.aspx
@@ -29,6 +29,11 @@ tags:
 [lor-solicit]:       http://academia.stackexchange.com/a/47374/31940
 [lor-whom]:          http://academia.stackexchange.com/a/27476/31940
 [lor-waive]:         http://academia.stackexchange.com/a/1154/31940
+[PI-wiki]:           https://en.wikipedia.org/wiki/Principal_investigator
+[martin-visit]:      http://www2.math.ou.edu/~kmartin/visit.html
+[tao-advice]:        https://terrytao.wordpress.com/career-advice/
+[wiki-tao]:          https://en.wikipedia.org/wiki/Terry_Tao
+[acadse-choose]:     http://academia.stackexchange.com/questions/66926/ive-been-admitted-to-multiple-phd-programs-how-should-i-choose-between-them
 
 ## Intended audience
 
@@ -100,7 +105,7 @@ As mentioned earlier, understanding your priorities is key to deciding where to 
 
 While looking at particular research groups is important, you should also look at the department as a whole, lest your research interests change between getting admitted and actually starting research.
 
-Apart from personal preferences, you should consider the following factors:
+Apart from personal preferences, you should consider the following factors (PI = [Principal Investigator][PI-wiki]):
 
 * Match of research interests (PI) - You *must* read papers here. The introductory information given on professors' webpages should only be used as a pre-filter.
 * Past PhD students (PI) - Did they attend conferences and publish regularly during the PhD? Were all papers published jointly with the advisor? Where are they working now?
@@ -113,6 +118,8 @@ Apart from personal preferences, you should consider the following factors:
 * Work atmosphere (dept./PI) - If you can contact a current grad student, ask about intangibles such as sense of community, friendliness etc.
 
 At the end of the scouting process, you should have a priority [tree][wiki-tree] (ideally a list) at hand.
+
+There is a nice meta post on Acad.SE titled "[I've been admitted to multiple PhD programs, how should I choose between them?][acadse-choose]". However, it also summarizes the information that you should keep in mind while selecting universities you should apply to.
 
 ## Standardized tests (and standard subheadings)
 
@@ -132,7 +139,7 @@ You are expected to understand the language at multiple levels of granularity: w
 
 The best way to prepare for this section is practice (duh!). I recommend using ETS's official book for practice, after you've looked at the examples on their website, as the material is fairly close in spirit to the actual test. Your priority should be to do official material first.
 
-For word lists, take any app of your choice which has various levels of difficulty (I used the free version of Magoosh). Practice regularly. You might find new words difficult to memorize in some cases. I strongly suggest using [Anki][anki] for these words. Anki is a spaced repetition software ([SRS][srs]), which allows you to create and *intelligently* schedule [flashcards][flashcard], which can be synced across multiple devices. Possible flashcard template: question = word, and answer = (meaning, example sentence). The Anki documentation is fairly well written and there is a nice, (currently) free ebook called [Anki Essentials][ankiessentials] by Alex Vermeer if you don't like reading documentation.
+For word lists, take any app of your choice which has various levels of difficulty (I used the free version of Magoosh). Practice regularly. You might find new words difficult to memorize in some cases. I strongly suggest using [Anki][anki] for these words. Anki is a spaced repetition software ([SRS][wiki-srs]), which allows you to create and *intelligently* schedule [flashcards][wiki-flashcard], which can be synced across multiple devices. Possible flashcard template: question = word, and answer = (meaning, example sentence). The Anki documentation is fairly well written and there is a nice, (currently) free ebook called [Anki Essentials][ankiessentials] by Alex Vermeer if you don't like reading documentation.
 
 #### Analytical Writing
 
@@ -250,7 +257,10 @@ Assuming that you receive more than one positive response AND have a sufficientl
 * **Priority tree** - If correctly made, this *should* account for all your *a priori* knowledge.
 * **Funding** - The only troublesome choice here is "no funding + good program" vs. "funding + not so good program." Again, there is no single correct answer; you have to take a call here based on your priorities. Try contacting students from both programs to get a rounded perspective.
 * **Open house visits** - Although I can't speak from personal experience here, I've had a couple of friends who felt that such a visit was very helpful in making a decision. If you can go without any issues, I'd strongly suggest that you do; this is a good chance to talk to current grad students in an informal setting about work-life balance etc. This kind of information is relatively difficult to judge from posts online. If you can't go, email the PI(s) you are interested in working with to get a better idea of their research, how you might fit in his/her group etc.
+  Also, check out [Tips for Visiting Grad Schools][martin-visit] by Prof. Kimball Martin, an Associate Professor of Mathematics at the University of Oklahoma.
 * **Decisions of friends/SO** - This will not be applicable if you can make friends easily and don't have a SO. Otherwise, everything else being roughly equal, you should definitely consider going together rather than alone. Consider the fact that you will be in grad school for a long time (5+ years!) and you WILL face ups and downs. Having someone you trust by your side in the latter situation can make all the difference.
+
+Obligatory link (repeat): [I've been admitted to multiple PhD programs, how should I choose between them?][acadse-choose].
 
 ## You're not done yet!
 
@@ -265,6 +275,10 @@ If you don't already know, healthcare in the US is terribly expensive compared t
 
 ## Fin
 
-Right now (April 2016), I'm still waiting for more admission decisions to come in. I'll update the previous section and the application timeline at a later date.
+Right now (April 2016), I still haven't completed all the admission formalities. I'll update the previous section and the application timeline at a later date.
 
 Thanks for reading. If you want to give feedback, check the [FAQ](/faq).
+
+## Bonus
+
+See [Career advice][tao-advice] by [Terry Tao][wiki-tao]. It contains a large number of links to helpful articles for people in different stages of their academic careers.
