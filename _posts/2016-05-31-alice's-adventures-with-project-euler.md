@@ -7,6 +7,7 @@ tags:
 - python
 - rust
 - project euler
+- functional programming
 ---
 
 [projecteuler]:  https://projecteuler.net
@@ -465,7 +466,8 @@ fn main () {
         }
         if ind == max {break;}
     }
-    println!("{:?} {:?} {:?} {:?} {:?} {:?} {:?}", v[0], v[10-1], v[100-1], v[1000-1], v[10000-1], v[100000-1], v[1000000-1]);
+    println!("{:?} {:?} {:?} {:?} {:?} {:?} {:?}",
+    v[0], v[10-1], v[100-1], v[1000-1], v[10000-1], v[100000-1], v[1000000-1]);
 }
 ```
 
@@ -511,12 +513,7 @@ fn rem0(base: usize, div: usize, p_j: usize) -> bool {
             val /= p_j;
         }
     }
-    if count2 >= count {
-        true
-    }
-    else {
-        false
-    }
+    count2 >= count
 }
 
 fn main() {
