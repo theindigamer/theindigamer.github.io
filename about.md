@@ -4,4 +4,4 @@ title: About
 permalink: /about/
 ---
 
-I am currently a senior undergraduate student of physics at IIT Bombay.
+I am currently a graduate student in physics at Cornell University.
