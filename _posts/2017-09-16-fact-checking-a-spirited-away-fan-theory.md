@@ -8,6 +8,12 @@ tags:
 - hayao miyazaki
 ---
 
+**Clarification (2017/13/10):** This post is intended as a discussion of the _subtext_ of the movie, not as creative interpretation. By subtext, I mean an interpretation where all the points made are supported by evidence in the text/in the appropriate historical context of the text.
+
+I have lightly edited the article to avoid coming across as overly haughty, the rest is as is.
+
+---
+
 Today morning, while browsing my Facebook feed, I bumped across an image shared via 9gag stating a fan theory regarding Studio Ghibli's _Spirited Away_ (2001). While the image I saw is located [here](https://9gag.com/gag/aRgKKq7), I've copied the text below -- in case the link dies any time soon.
 
 > I've always wondered why the symbol "ゆ" (said "yu") was on the door to the bath house. I asked my Japanese teacher, and he wasn't too sure so I did a little research.
@@ -33,12 +39,12 @@ A little searching shows that the same text has been circulating for a while now
 
 At first sight, perhaps one might think that the theory is believable, as evidenced by many people sharing and liking it on Facebook (and other sites in the past).
 
-**Proposition**: The fan theory above does not
+**Claim**: The fan theory above does not
 
 1. represent authorial intent, contrary to the claim near the end.
-2. is not consistent with the film unless serious creative liberty is taken with interpretation. More simply put, it is bollocks.
+2. is not consistent with the film unless serious creative liberty is taken with interpretation.
 
-**Proof**:
+**Analysis**:
 
 For brevity, let us call the default hypothesis -- where the bath house represents a mere bath house as opposed to a brothel -- the "bath house theory".
 
@@ -137,7 +143,7 @@ From [[8][8]], titled "Interview: Miyazaki on Sen to Chihiro no Kamikakushi":
 >
 > If they find this movie to be exciting, it will be a success in my mind. They can't lie. Until now, I made "I wish there was such a person" leading characters. This time, however, I created a heroine who is an ordinary girl, someone with whom the audience can sympathize, someone about whom they can say, "Yes, it's like that." It's very important to make it plain and unexaggerated. Starting with that, it's not a story in which the characters grow up, but a story in which they draw on something already inside them, brought out by the particular circumstances... I wanted to tell such a story in this movie. I want my young friends to live like that, and I think they, too, have such a wish.
 
-I think that these two interviews prove part 1 of the proposition and the remaining arguments prove part 2. Q.E.D.
+I think that these two interviews support part 1 of the claim and the remaining arguments support part 2.
 
 [1]: https://en.wikipedia.org/wiki/Sent%C5%8D#Future
 [2]: https://www.google.com/search?tbm=bks&q=yunafuro
