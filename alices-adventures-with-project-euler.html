@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" href="/favicon.gif">
+<head>
+  <meta charset="UTF-8" />
+  <title>Alice’s Adventures with Project Euler | Nocturne in Code and Prose</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,400i,600%7CSource+Sans+Pro:400,400i,600,600i&amp;subset=latin-ext" />
+  <link rel="stylesheet" href="https://theindigamer.github.io/static/m-dark.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="keywords" content="haskell, rust, python, project euler" />
+  <meta property="og:title" content="Alice’s Adventures with Project Euler" />
+  <meta name="twitter:title" content="Alice’s Adventures with Project Euler" />
+  <meta property="og:url" content="https://theindigamer.github.io/alices-adventures-with-project-euler.html" />
+  <meta name="twitter:url" content="https://theindigamer.github.io/alices-adventures-with-project-euler.html" />
+  <meta property="og:description" content="Af­ter her ad­ven­tures in the strange and es­o­ter­ic Won­der­land, Al­ice was in a bad mood. She re­fused to ven­ture out­side, lest she fall in­to a rab­bit hole again. In­stead, she would sit in front of the com­put­er all day, read­ing all there was to read on the in­ter­net. One of her favourite pas­times was to read about math­e­mat­ics…" />
+  <meta name="twitter:description" content="Af­ter her ad­ven­tures in the strange and es­o­ter­ic Won­der­land, Al­ice was in a bad mood. She re­fused to ven­ture out­side, lest she fall in­to a rab­bit hole again. In­stead, she would sit in front of the com­put­er all day, read­ing all there was to read on the in­ter­net. One of her favourite pas­times was to read about math­e­mat­ics…" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:type" content="article" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="https://theindigamer.github.io/" id="m-navbar-brand" class="m-col-t-9 m-col-m-none m-left-m">Nocturne in Code and Prose</a>
+      <a id="m-navbar-show" href="#navigation" title="Show navigation" class="m-col-t-3 m-hide-m m-text-right"></a>
+      <a id="m-navbar-hide" href="#" title="Hide navigation" class="m-col-t-3 m-hide-m m-text-right"></a>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="https://theindigamer.github.io/pages/about.html">About?</a>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="2">
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main>
+<div class="m-container">
+  <div class="m-row">
+    <article class="m-col-m-10 m-nopadb">
+      <header>
+        <h1><a href="https://theindigamer.github.io/alices-adventures-with-project-euler.html" rel="bookmark" title="Permalink to Alice’s Adventures with Project Euler">
+          <time class="m-date" datetime="2016-05-31T00:00:00-05:00">
+            May <span class="m-date-day">31</span> 2016
+          </time>
+          Alice’s Adventures with Project Euler
+        </a></h1>
+        <!-- <p>Af&shy;ter her ad&shy;ven&shy;tures in the strange and es&shy;o&shy;ter&shy;ic Won&shy;der&shy;land, Al&shy;ice
+        was in a bad mood. She re&shy;fused to ven&shy;ture out&shy;side, lest she fall in&shy;to a
+        rab&shy;bit hole again. In&shy;stead, she would sit in front of the com&shy;put&shy;er all day,
+        read&shy;ing all there was to read on the in&shy;ter&shy;net. One of her favourite pas&shy;times
+        was to read about math&shy;e&shy;mat&shy;ics…</p>
+       -->
+      </header>
+      <div class="m-clearfix-l"></div>
+<!-- content -->
+<section id="prologue">
+<h2>Prologue</h2>
+<p>Af&shy;ter her ad&shy;ven&shy;tures in the strange and es&shy;o&shy;ter&shy;ic Won&shy;der&shy;land, Al&shy;ice was
+in a bad mood. She re&shy;fused to ven&shy;ture out&shy;side, lest she fall in&shy;to a
+rab&shy;bit hole again. In&shy;stead, she would sit in front of the com&shy;put&shy;er all
+day, read&shy;ing all there was to read on the in&shy;ter&shy;net. One of her favourite
+pas&shy;times was to read about math&shy;e&shy;mat&shy;ics. Her fa&shy;ther, ev&shy;er so keen on
+turn&shy;ing Al&shy;ice in&shy;to a prop&shy;er la&shy;dy, ap&shy;point&shy;ed a gov&shy;erness to teach her
+lit&shy;er&shy;a&shy;ture, his&shy;to&shy;ry and phi&shy;los&shy;o&shy;phy. Al&shy;ice would of&shy;ten fight with the
+gov&shy;erness; the gov&shy;erness would make her read Hegel and Kierkegaard,
+where&shy;as Al&shy;ice was much more in&shy;ter&shy;est&shy;ed in the works of Bertrand Rus&shy;sell
+and Wittgen&shy;stein.</p>
+<p>For ev&shy;ery lit&shy;tle task the gov&shy;erness as&shy;signed to Al&shy;ice, Al&shy;ice would do
+the ex&shy;act op&shy;po&shy;site if it were pos&shy;si&shy;ble to do so. Fi&shy;nal&shy;ly, the gov&shy;erness
+was fed up. She told Al&shy;ice, “I will give you per&shy;mis&shy;sion to study the
+life and work of any one per&shy;son you may de&shy;sire. It may even be a
+math&shy;e&shy;ma&shy;ti&shy;cian (hmph!). How&shy;ev&shy;er, you must pre&shy;pare a thor&shy;ough re&shy;port
+de&shy;scrib&shy;ing ev&shy;ery&shy;thing you’ve read about that per&shy;son, no short&shy;er than
+thir&shy;ty pages.” Al&shy;ice was not amused. How&shy;ev&shy;er, she grudg&shy;ing&shy;ly ac&shy;cept&shy;ed.
+Af&shy;ter all, 1 &gt; 0. Of course, that doesn’t mean that she in&shy;tend&shy;ed to
+write the re&shy;port by her&shy;self. As all good stu&shy;dents do, she first checked
+whether such a re&shy;port was al&shy;ready avail&shy;able on the in&shy;ter&shy;net. Since Eu&shy;ler
+was her favourite math&shy;e&shy;ma&shy;ti&shy;cian (he was the first one to solve the Basel
+prob&shy;lem!), she typed in “Eu&shy;ler project re&shy;port” and hit the first
+<a href="https://projecteuler.net">link</a> she en&shy;coun&shy;tered with&shy;out think&shy;ing too
+much. It said:</p>
+<blockquote>
+<p>What is Project Eu&shy;ler?</p>
+<p>Project Eu&shy;ler is a se&shy;ries of chal&shy;leng&shy;ing math&shy;e&shy;mat&shy;i&shy;cal/com&shy;put&shy;er
+pro&shy;gram&shy;ming prob&shy;lems that will re&shy;quire more than just math&shy;e&shy;mat&shy;i&shy;cal
+in&shy;sights to solve. Al&shy;though math&shy;e&shy;mat&shy;ics will help you ar&shy;rive at
+el&shy;e&shy;gant and ef&shy;fi&shy;cient meth&shy;ods, the use of a com&shy;put&shy;er and pro&shy;gram&shy;ming
+skills will be re&shy;quired to solve most prob&shy;lems.</p>
+<p>The mo&shy;ti&shy;va&shy;tion for start&shy;ing Project Eu&shy;ler, and its con&shy;tin&shy;u&shy;a&shy;tion, is
+to pro&shy;vide a plat&shy;form for the in&shy;quir&shy;ing mind to delve in&shy;to
+un&shy;fa&shy;mil&shy;iar ar&shy;eas and learn new con&shy;cepts in a fun and recre&shy;ation&shy;al
+con&shy;text.</p>
+</blockquote>
+<p>Al&shy;ice’s in&shy;ter&shy;est was slight&shy;ly piqued. She loved chal&shy;leng&shy;ing math&shy;e&shy;mat&shy;i&shy;cal
+prob&shy;lems but she didn’t know pro&shy;gram&shy;ming. Her friend Bob did. So she
+wrote the fol&shy;low&shy;ing email to Bob:</p>
+<blockquote>
+<p>Bob,</p>
+<p>I’ve stum&shy;bled across this site called Project Eu&shy;ler. Do you know
+about it? It has a large num&shy;ber of nice math&shy;e&shy;mat&shy;ics/pro&shy;gram&shy;ming
+prob&shy;lems. Can you rec&shy;om&shy;mend a fun pro&shy;gram&shy;ming lan&shy;guage to learn for
+solv&shy;ing them? I’ll pick up the de&shy;tails from tu&shy;to&shy;ri&shy;als on&shy;line (duh!),
+but I just need a sug&shy;ges&shy;tion to get start&shy;ed.</p>
+<p>Bye,</p>
+<p>A</p>
+</blockquote>
+<p>Bob was sur&shy;prised. Al&shy;ice gen&shy;er&shy;al&shy;ly ex&shy;pressed dis&shy;taste for us&shy;ing ex&shy;ter&shy;nal
+aid in solv&shy;ing prob&shy;lems. He wrote back prompt&shy;ly:</p>
+<blockquote>
+<p>Hi Al&shy;ice,</p>
+<p>Oh, so you’ve fi&shy;nal&shy;ly writ&shy;ten to me about pro&shy;gram&shy;ming. De&shy;spite all
+the arith&shy;metic you can do in your head, I’m hap&shy;py that you’ve
+re&shy;al&shy;ized that this is too much for you. Un&shy;for&shy;tu&shy;nate&shy;ly, giv&shy;en that
+there are so many fun pro&shy;gram&shy;ming lan&shy;guages out there, it is hard to
+rec&shy;om&shy;mend just one. So I’ve se&shy;lect&shy;ed three (amongst the many I know
+:P) that you’ll prob&shy;a&shy;bly en&shy;joy. In no par&shy;tic&shy;u&shy;lar or&shy;der,</p>
+<ul class="simple">
+<li>Haskell: Per&shy;fect for bud&shy;ding math&shy;e&shy;ma&shy;ti&shy;cians. I know you’ll love
+it.</li>
+<li>Python: You might want to start with this for a gen&shy;tle
+in&shy;tro&shy;duc&shy;tion to pro&shy;gram&shy;ming :P.</li>
+<li>Rust: This one is hard to de&shy;scribe to a non-pro&shy;gram&shy;mer like you
+:-/. Just read the of&shy;fi&shy;cial de&shy;scrip&shy;tion.</li>
+</ul>
+<p>Let me know which one you like the most!</p>
+<p>Best,</p>
+<p>Bob</p>
+</blockquote>
+<p>Fi&shy;nal&shy;ly, Al&shy;ice set out to ran&shy;dom&shy;ly solve a few prob&shy;lems from the Project
+Eu&shy;ler data&shy;base. She tried all the lan&shy;guages that Bob had sug&shy;gest&shy;ed. She
+al&shy;so tried solv&shy;ing some prob&shy;lems us&shy;ing mul&shy;ti&shy;ple lan&shy;guages. While sev&shy;er&shy;al
+of the prob&shy;lems were triv&shy;ial&shy;ly easy, she was dili&shy;gent enough to write
+down short notes for all the prob&shy;lems de&shy;scrib&shy;ing the syn&shy;tax and her
+pro&shy;gram&shy;ming ex&shy;pe&shy;ri&shy;ence.</p>
+</section>
+<section id="haskell">
+<h2>Haskell</h2>
+<section id="problem-4">
+<h3>Problem 4</h3>
+<blockquote>
+<p>A palin&shy;dromic num&shy;ber reads the same both ways. The largest
+palin&shy;drome made from the prod&shy;uct of two 2-dig&shy;it num&shy;bers is 9009 = 91
+× 99.</p>
+<p>Find the largest palin&shy;drome made from the prod&shy;uct of two 3-dig&shy;it
+num&shy;bers.</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 4 (0.005s):</p>
+<pre class="m-code"><span class="nf">palindrome</span> <span class="n">x</span> <span class="ow">=</span> <span class="p">(</span><span class="n">show</span> <span class="n">x</span> <span class="o">==</span> <span class="n">reverse</span> <span class="p">(</span><span class="n">show</span> <span class="n">x</span><span class="p">))</span>
+<span class="nf">main</span> <span class="ow">=</span> <span class="n">print</span>
+  <span class="p">(</span><span class="n">maximum</span>
+    <span class="p">(</span><span class="n">filter</span> <span class="n">palindrome</span> <span class="p">[</span><span class="n">y1</span><span class="o">*</span><span class="n">y2</span> <span class="o">|</span> <span class="kr">let</span> <span class="n">x</span> <span class="ow">=</span> <span class="p">[</span><span class="mi">999</span><span class="p">,</span> <span class="mi">998</span> <span class="o">..</span> <span class="mi">100</span><span class="p">],</span> <span class="n">y1</span> <span class="ow">&lt;-</span> <span class="n">x</span><span class="p">,</span> <span class="n">y2</span> <span class="ow">&lt;-</span> <span class="n">x</span><span class="p">]))</span></pre>
+<p>Notes: <code>show</code> con&shy;verts stuff to a <code>string</code>. <code>filter</code> fil&shy;ters the
+el&shy;e&shy;ments in the list which give <code>palindrome x == True</code>. <code>&lt;-</code>
+rep&shy;re&shy;sents the set mem&shy;ber&shy;ship ∈. The so&shy;lu&shy;tion is re&shy;al&shy;ly clean and easy
+to un&shy;der&shy;stand. I tried rewrit&shy;ing it in Python and Rust lat&shy;er but I like
+the Haskell so&shy;lu&shy;tion the best.</p>
+</section>
+<section id="problem-14">
+<h3>Problem 14</h3>
+<blockquote>
+<p>The fol&shy;low&shy;ing it&shy;er&shy;a&shy;tive se&shy;quence is de&shy;fined for the set of pos&shy;i&shy;tive
+in&shy;te&shy;gers:</p>
+<p>n → n/2 (n is even) n → 3n + 1 (n is odd)</p>
+<p>Us&shy;ing the rule above and start&shy;ing with 13, we gen&shy;er&shy;ate the fol&shy;low&shy;ing
+se&shy;quence: 13 → 40 → 20 → 10 → 5 → 16 → 8 → 4 → 2 → 1</p>
+<p>It can be seen that this se&shy;quence (start&shy;ing at 13 and fin&shy;ish&shy;ing at
+1) con&shy;tains 10 terms. Al&shy;though it has not been proved yet (Col&shy;latz
+Prob&shy;lem), it is thought that all start&shy;ing num&shy;bers fin&shy;ish at 1.</p>
+<p>Which start&shy;ing num&shy;ber, un&shy;der one mil&shy;lion, pro&shy;duces the long&shy;est
+chain?</p>
+<p>NOTE: Once the chain starts the terms are al&shy;lowed to go above one
+mil&shy;lion.</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 14 (4.7s):</p>
+<pre class="m-code"><span class="nf">collatz</span> <span class="ow">::</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">Int</span>
+<span class="nf">collatz</span> <span class="n">n</span>
+    <span class="o">|</span> <span class="n">n</span> <span class="p">`</span><span class="n">rem</span><span class="p">`</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">=</span> <span class="n">n</span> <span class="p">`</span><span class="n">div</span><span class="p">`</span> <span class="mi">2</span>
+    <span class="o">|</span> <span class="n">otherwise</span> <span class="ow">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span>
+
+<span class="nf">collatz_len</span> <span class="ow">::</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">Int</span>
+<span class="nf">collatz_len</span> <span class="mi">1</span> <span class="ow">=</span> <span class="mi">1</span>
+<span class="nf">collatz_len</span> <span class="n">n</span> <span class="ow">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">collatz_len</span> <span class="p">(</span><span class="n">collatz</span> <span class="n">n</span><span class="p">)</span>
+
+<span class="nf">main</span> <span class="ow">=</span> <span class="n">print</span> <span class="p">(</span><span class="n">maximum</span> <span class="p">(</span><span class="n">map</span> <span class="n">collatz_len</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">..</span> <span class="mi">999999</span><span class="p">]))</span></pre>
+<p>Notes: I’ve spec&shy;i&shy;fied the types of func&shy;tions for con&shy;ve&shy;nience. The pipes
+<code>|</code> act as con&shy;di&shy;tion&shy;al state&shy;ments <code>if</code>, <code>else</code> etc. <code>map</code>
+ap&shy;plies <code>collatz_len</code> to all el&shy;e&shy;ments of the list. Again, writ&shy;ing the
+code is very straight-for&shy;ward from the prob&shy;lem stat&shy;ment.</p>
+</section>
+<section id="problem-25">
+<h3>Problem 25</h3>
+<blockquote>
+<p>The Fi&shy;bonac&shy;ci se&shy;quence is de&shy;fined by the re&shy;cur&shy;rence re&shy;la&shy;tion:</p>
+<p>Fn = Fn−1 + Fn−2 , where F1 = 1 and F2 = 1.</p>
+<p>Hence the first 12 terms will be:</p>
+<p>F1 = 1, F2 = 1, F3 = 2, F4 = 3, F5 = 5, F6 = 8, F7 = 13, F8 = 21, F9
+= 34, F10 = 55, F11 = 89, F12 = 144.</p>
+<p>The 12th term, F12 , is the first term to con&shy;tain three dig&shy;its.</p>
+<p>What is the in&shy;dex of the first term in the Fi&shy;bonac&shy;ci se&shy;quence to
+con&shy;tain 1000 dig&shy;its?</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 25 (0.26s):</p>
+<pre class="m-code"><span class="nf">fibs</span> <span class="ow">::</span> <span class="p">[</span><span class="kt">Integer</span><span class="p">]</span>
+<span class="nf">fibs</span> <span class="ow">=</span> <span class="mi">1</span><span class="kt">:</span><span class="mi">1</span><span class="kt">:</span><span class="n">zipWith</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="n">fibs</span> <span class="p">(</span><span class="n">tail</span> <span class="n">fibs</span><span class="p">)</span>
+
+<span class="nf">fib</span> <span class="ow">::</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">Integer</span>
+<span class="nf">fib</span> <span class="n">n</span> <span class="ow">=</span> <span class="n">fibs</span> <span class="o">!!</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nf">fibdigs</span> <span class="n">n</span> <span class="ow">=</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">length</span> <span class="p">(</span><span class="n">show</span> <span class="p">(</span><span class="n">fib</span> <span class="n">n</span><span class="p">)))</span>
+
+<span class="nf">main</span> <span class="ow">=</span> <span class="n">print</span> <span class="p">(</span><span class="n">head</span> <span class="p">(</span><span class="n">filter</span> <span class="p">((</span><span class="o">==</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">snd</span><span class="p">)</span> <span class="p">(</span><span class="n">map</span> <span class="n">fibdigs</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">..</span> <span class="p">])))</span></pre>
+<p>Notes: The Fi&shy;bonac&shy;ci num&shy;bers are arb&shy;trary pre&shy;ci&shy;sion <code>Integer</code>s.
+<code>zipWith</code> takes a func&shy;tion <code>f</code> and two lists and cre&shy;ates a new list
+by ap&shy;ply&shy;ing <code>f</code> to pairs of el&shy;e&shy;ments. <code>!!</code> se&shy;lects an el&shy;e&shy;ment from
+the list. <code>==1000</code> cre&shy;ates a par&shy;tial func&shy;tion. <code>.</code> de&shy;notes the
+func&shy;tion com&shy;po&shy;si&shy;tion ∘. <code>snd</code> picks out the sec&shy;ond el&shy;e&shy;ment of a tu&shy;ple.
+Here, we are us&shy;ing an in&shy;fi&shy;nite list <code>[1, 2 .. ]</code> which is <a href="https://en.wikipedia.org/wiki/Lazy_evaluation">lazi&shy;ly
+eval&shy;u&shy;at&shy;ed</a>. As with
+the ear&shy;li&shy;er two prob&shy;lems, writ&shy;ing the code is very easy from the prob&shy;lem
+state&shy;ment with the on&shy;ly clever part be&shy;ing the con&shy;struc&shy;tion of the
+Fi&shy;bonac&shy;ci num&shy;bers.</p>
+</section>
+<section id="problem-104">
+<h3>Problem 104</h3>
+<blockquote>
+<p>The Fi&shy;bonac&shy;ci se&shy;quence is de&shy;fined by the re&shy;cur&shy;rence re&shy;la&shy;tion:</p>
+<p>Fn = Fn−1 + Fn−2 , where F1 = 1 and F2 = 1.</p>
+<p>It turns out that F541 , which con&shy;tains 113 dig&shy;its, is the first
+Fi&shy;bonac&shy;ci num&shy;ber for which the last nine dig&shy;its are 1-9 pandig&shy;i&shy;tal
+(con&shy;tain all the dig&shy;its 1 to 9, but not nec&shy;es&shy;sar&shy;i&shy;ly in or&shy;der). And
+F2749 , which con&shy;tains 575 dig&shy;its, is the first Fi&shy;bonac&shy;ci num&shy;ber for
+which the first nine dig&shy;its are 1-9 pandig&shy;i&shy;tal.</p>
+<p>Giv&shy;en that Fk is the first Fi&shy;bonac&shy;ci num&shy;ber for which the first nine
+dig&shy;its AND the last nine dig&shy;its are 1-9 pandig&shy;i&shy;tal, find k.</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 104 (~41 min):</p>
+<pre class="m-code"><span class="kr">import</span> <span class="nn">Data.Char</span> <span class="p">(</span><span class="nf">digitToInt</span><span class="p">)</span>
+<span class="kr">import</span> <span class="nn">Data.List</span> <span class="p">(</span><span class="nf">sort</span><span class="p">)</span>
+
+<span class="nf">fibs</span> <span class="ow">::</span> <span class="p">[</span><span class="kt">Integer</span><span class="p">]</span>
+<span class="nf">fibs</span> <span class="ow">=</span> <span class="mi">1</span><span class="kt">:</span><span class="mi">1</span><span class="kt">:</span><span class="n">zipWith</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="n">fibs</span> <span class="p">(</span><span class="n">tail</span> <span class="n">fibs</span><span class="p">)</span>
+<span class="nf">fib</span> <span class="ow">::</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">Integer</span>
+<span class="nf">fib</span> <span class="n">n</span> <span class="ow">=</span> <span class="n">fibs</span> <span class="o">!!</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nf">first_9_digits</span> <span class="ow">::</span> <span class="kt">Integer</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="kt">Int</span><span class="p">]</span>
+<span class="nf">first_9_digits</span> <span class="n">x</span> <span class="ow">=</span> <span class="n">map</span> <span class="n">digitToInt</span> <span class="p">(</span><span class="n">take</span> <span class="mi">9</span> <span class="p">(</span><span class="n">show</span> <span class="n">x</span><span class="p">))</span>
+<span class="nf">last_9_digits</span> <span class="n">x</span> <span class="ow">=</span> <span class="n">map</span> <span class="n">digitToInt</span> <span class="p">(</span><span class="n">take</span> <span class="mi">9</span> <span class="p">(</span><span class="n">reverse</span> <span class="p">(</span><span class="n">show</span> <span class="n">x</span><span class="p">)))</span>
+
+<span class="nf">pandigital_ends</span> <span class="ow">::</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Bool</span><span class="p">)</span>
+<span class="nf">pandigital_ends</span> <span class="n">n</span>
+    <span class="o">|</span> <span class="p">[</span><span class="mi">1</span> <span class="o">..</span> <span class="mi">9</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="n">sort</span> <span class="n">f9</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">[</span><span class="mi">1</span> <span class="o">..</span> <span class="mi">9</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="n">sort</span> <span class="n">l9</span><span class="p">)</span> <span class="ow">=</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="kt">True</span><span class="p">)</span>
+    <span class="o">|</span> <span class="n">otherwise</span> <span class="ow">=</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="kt">False</span><span class="p">)</span>
+    <span class="kr">where</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">fib</span> <span class="n">n</span>
+          <span class="n">f9</span> <span class="ow">=</span> <span class="n">first_9_digits</span> <span class="n">f</span>
+          <span class="n">l9</span> <span class="ow">=</span> <span class="n">last_9_digits</span> <span class="n">f</span>
+
+<span class="nf">main</span> <span class="ow">=</span> <span class="n">print</span> <span class="p">(</span><span class="n">head</span> <span class="p">[</span><span class="n">x</span> <span class="o">|</span> <span class="n">x</span> <span class="ow">&lt;-</span> <span class="n">map</span> <span class="n">pandigital_ends</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">..</span><span class="p">],</span> <span class="n">snd</span> <span class="n">x</span><span class="p">])</span></pre>
+<p>Notes: The <code>where</code> clause al&shy;lows short sub&shy;sti&shy;tu&shy;tions, much like
+<code>let</code> ear&shy;li&shy;er. This so&shy;lu&shy;tion is fair&shy;ly slow prob&shy;a&shy;bly be&shy;cause a lot of
+time is be&shy;ing wast&shy;ed in ac&shy;tu&shy;al&shy;ly eval&shy;u&shy;at&shy;ing all the Fi&shy;bonac&shy;ci num&shy;bers.</p>
+</section>
+</section>
+<section id="python">
+<h2>Python</h2>
+<section id="problem-69">
+<h3>Problem 69</h3>
+<blockquote>
+<p>Eu&shy;ler’s To&shy;tient func&shy;tion, φ(n) [some&shy;times called the phi func&shy;tion],
+is used to de&shy;ter&shy;mine the num&shy;ber of num&shy;bers less than n which are
+rel&shy;a&shy;tive&shy;ly prime to n. For ex&shy;am&shy;ple, as 1, 2, 4, 5, 7, and 8, are all
+less than nine and rel&shy;a&shy;tive&shy;ly prime to nine, φ(9)=6.</p>
+<table>
+<thead>
+<tr><th class="head">n</th>
+<th class="head">Rel&shy;a&shy;tive&shy;ly Prime</th>
+<th class="head">φ(n)</th>
+<th class="head">n/φ(n)</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>2</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr><td>3</td>
+<td>1,2</td>
+<td>2</td>
+<td>1.5</td>
+</tr>
+<tr><td>4</td>
+<td>1,3</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr><td>5</td>
+<td>1,2,3,4</td>
+<td>4</td>
+<td>1.25</td>
+</tr>
+<tr><td>6</td>
+<td>1,5</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr><td>7</td>
+<td>1,2,3,4,5,6</td>
+<td>6</td>
+<td>1.1666…</td>
+</tr>
+<tr><td>8</td>
+<td>1,3,5,7</td>
+<td>4</td>
+<td>2</td>
+</tr>
+<tr><td>9</td>
+<td>1,2,4,5,7,8</td>
+<td>6</td>
+<td>1.5</td>
+</tr>
+<tr><td>10</td>
+<td>1,3,7,9</td>
+<td>4</td>
+<td>2.5</td>
+</tr>
+</tbody>
+</table>
+<p>It can be seen that n=6 pro&shy;duces a max&shy;i&shy;mum n/φ(n) for n ≤ 10.</p>
+<p>Find the val&shy;ue of n ≤ 1,000,000 for which n/φ(n) is a max&shy;i&shy;mum.</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 69 (PyPy: 75s)</p>
+<pre class="m-code"><span class="n">maxnum</span> <span class="o">=</span> <span class="mi">1000000</span>
+
+<span class="n">totient_table</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">maxnum</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+<span class="n">totient_table</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">totient_table</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="k">def</span> <span class="nf">gcd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+    <span class="k">while</span> <span class="n">b</span><span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">a</span> <span class="o">%</span> <span class="n">b</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">t</span>
+    <span class="k">return</span> <span class="n">a</span>
+
+<span class="n">primes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">totient</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">primes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">%</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">a</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="p">(</span><span class="n">c</span> <span class="o">%</span> <span class="n">b</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">c</span> <span class="o">/</span> <span class="n">b</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">d</span> <span class="o">*</span> <span class="n">b</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">gcd</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">d</span> <span class="o">==</span> <span class="n">a</span><span class="p">):</span>
+                <span class="n">totient_table</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span>
+                <span class="k">return</span> <span class="n">totient_table</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+            <span class="n">totient_table</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">totient_table</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">*</span><span class="n">totient_table</span><span class="p">[</span><span class="n">d</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">totient_table</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+    <span class="c1"># Otherwise `a` is a prime</span>
+    <span class="n">totient_table</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="o">-</span><span class="mi">1</span>
+    <span class="n">primes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">totient_table</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+
+<span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">maxnum</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">totient</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">:</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">x</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">totient_table</span><span class="p">[</span><span class="n">maxnum</span><span class="p">])</span></pre>
+<p>Notes: Ac&shy;tu&shy;al&shy;ly, this prob&shy;lem can be solved by hand if one sees Eu&shy;ler’s
+own sim&shy;pli&shy;fied for&shy;mu&shy;la for the to&shy;tient func&shy;tion. And I used to think he
+was my favourite. :’(</p>
+</section>
+<section id="problem-102">
+<h3>Problem 102</h3>
+<blockquote>
+<p>Three dis&shy;tinct points are plot&shy;ted at ran&shy;dom on a Carte&shy;sian plane,
+for which -1000 ≤ x, y ≤ 1000, such that a tri&shy;an&shy;gle is formed.</p>
+<p>Con&shy;sid&shy;er the fol&shy;low&shy;ing two tri&shy;an&shy;gles:</p>
+<p>A(-340,495), B(-153,-910), C(835,-947)</p>
+<p>X(-175,41), Y(-421,-714), Z(574,-645)</p>
+<p>It can be ver&shy;i&shy;fied that tri&shy;an&shy;gle ABC con&shy;tains the ori&shy;gin, where&shy;as
+tri&shy;an&shy;gle XYZ does not.</p>
+<p>Us&shy;ing tri&shy;an&shy;gles.txt (right click and ‘Save Link/Tar&shy;get As…’), a
+27K text file con&shy;tain&shy;ing the co-or&shy;di&shy;nates of one thou&shy;sand “ran&shy;dom”
+tri&shy;an&shy;gles, find the num&shy;ber of tri&shy;an&shy;gles for which the in&shy;te&shy;ri&shy;or
+con&shy;tains the ori&shy;gin.</p>
+<p>NOTE: The first two ex&shy;am&shy;ples in the file rep&shy;re&shy;sent the tri&shy;an&shy;gles in
+the ex&shy;am&shy;ple giv&shy;en above.</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 102 (Python2.7: 0.05s):</p>
+<pre class="m-code"><span class="k">def</span> <span class="nf">haszero</span><span class="p">(</span><span class="n">sixpoints</span><span class="p">):</span>
+    <span class="n">ax</span><span class="p">,</span> <span class="n">ay</span> <span class="o">=</span> <span class="n">sixpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sixpoints</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">bx</span><span class="p">,</span> <span class="n">by</span> <span class="o">=</span> <span class="n">sixpoints</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">sixpoints</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">cx</span><span class="p">,</span> <span class="n">cy</span> <span class="o">=</span> <span class="n">sixpoints</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">sixpoints</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span> <span class="o">=</span> <span class="n">ax</span><span class="o">*</span><span class="n">by</span> <span class="o">-</span> <span class="n">ay</span><span class="o">*</span><span class="n">bx</span><span class="p">,</span> <span class="n">bx</span><span class="o">*</span><span class="n">cy</span> <span class="o">-</span> <span class="n">by</span><span class="o">*</span><span class="n">cx</span><span class="p">,</span> <span class="n">cx</span><span class="o">*</span><span class="n">ay</span> <span class="o">-</span> <span class="n">cy</span><span class="o">*</span><span class="n">ax</span>
+    <span class="k">if</span> <span class="n">s1</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">s2</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">s3</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">s1</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="n">s1</span><span class="p">))</span> <span class="o">==</span> <span class="p">(</span><span class="n">s2</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="n">s2</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">s2</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="n">s2</span><span class="p">))</span> <span class="o">==</span> <span class="p">(</span><span class="n">s3</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="n">s3</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+<span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;p102_triangles.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">sixpoints</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">sixpoints</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sixpoints</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">haszero</span><span class="p">(</span><span class="n">sixpoints</span><span class="p">):</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">count</span><span class="p">)</span></pre>
+<p>Notes: File I/O and string ma&shy;nip&shy;u&shy;la&shy;tion is very easy with Python. The
+usu&shy;al <code>for a in b</code> syn&shy;tax al&shy;so works for files.</p>
+</section>
+<section id="problem-106">
+<h3>Problem 106</h3>
+<blockquote>
+<p>Let S(A) rep&shy;re&shy;sent the sum of el&shy;e&shy;ments in set A of size n. We shall
+call it a spe&shy;cial sum set if for any two non-emp&shy;ty dis&shy;joint sub&shy;sets,
+B and C, the fol&shy;low&shy;ing prop&shy;er&shy;ties are true:</p>
+<ol class="arabic simple">
+<li>S(B) ≠ S(C); that is, sums of sub&shy;sets can&shy;not be equal.</li>
+<li>If B con&shy;tains more el&shy;e&shy;ments than C then S(B) &gt; S(C).</li>
+</ol>
+<p>For this prob&shy;lem we shall as&shy;sume that a giv&shy;en set con&shy;tains n
+strict&shy;ly in&shy;creas&shy;ing el&shy;e&shy;ments and it al&shy;ready sat&shy;is&shy;fies the sec&shy;ond
+rule.</p>
+<p>Sur&shy;pris&shy;ing&shy;ly, out of the 25 pos&shy;si&shy;ble sub&shy;set pairs that can be
+ob&shy;tained from a set for which n = 4, on&shy;ly 1 of these pairs need to
+be test&shy;ed for equal&shy;i&shy;ty (first rule). Sim&shy;i&shy;lar&shy;ly, when n = 7, on&shy;ly 70
+out of the 966 sub&shy;set pairs need to be test&shy;ed.</p>
+<p>For n = 12, how many of the 261625 sub&shy;set pairs that can be ob&shy;tained
+need to be test&shy;ed for equal&shy;i&shy;ty?</p>
+<p>NOTE: This prob&shy;lem is re&shy;lat&shy;ed to Prob&shy;lem 103 and Prob&shy;lem 105.</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 106 (Python2.7: 1.2s)</p>
+<pre class="m-code"><span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="kn">import</span> <span class="n">comb</span>
+
+<span class="k">def</span> <span class="nf">check_not_reqd</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">bn</span><span class="p">,</span><span class="n">cn</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bn</span> <span class="o">&lt;</span> <span class="n">cn</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+<span class="k">def</span> <span class="nf">recurse</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">b</span><span class="p">[</span><span class="n">length</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">length</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">check_not_reqd</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)):</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">count</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">b</span><span class="p">[</span><span class="n">length</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">depth</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="n">recurse</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">[</span><span class="n">length</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">depth</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">end</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">count</span>
+
+<span class="k">print</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">comb</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">recurse</span><span class="p">([</span><span class="mi">0</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="mi">2</span><span class="p">)],</span><span class="n">t</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">t</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">t</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">]]))</span></pre>
+<p>Notes: We need to check the pair (B,C) if and on&shy;ly if we don’t have
+|B|=|C| and we don’t have the in&shy;dices of C in A dom&shy;i&shy;nat&shy;ing the
+in&shy;dices of B in A el&shy;e&shy;ment-wise (or vice-ver&shy;sa). So the so&shy;lu&shy;tion is
+ob&shy;tained by con&shy;struct&shy;ing all the par&shy;ti&shy;tions of in&shy;dices which don’t
+sat&shy;is&shy;fy the two con&shy;di&shy;tions.</p>
+<p>Here is an ex&shy;pand&shy;ed ver&shy;sion of the <code>recurse</code> func&shy;tion for <code>t=8</code>.</p>
+<pre class="m-code"><span class="n">tot</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">]</span>
+<span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">end</span> <span class="o">=</span> <span class="n">tot</span><span class="o">/</span><span class="mi">2</span>
+<span class="k">for</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">end</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">end</span><span class="o">+</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">b</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">end</span><span class="o">+</span><span class="mi">3</span><span class="p">):</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tot</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">b</span><span class="p">]</span>
+                <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">check_not_reqd</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)):</span>
+                    <span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="k">print</span><span class="p">(</span><span class="n">count</span><span class="p">)</span></pre>
+<p>Au&shy;thor’s note: Con&shy;sid&shy;er the “if and on&shy;ly if” state&shy;ment posed by Al&shy;ice as
+P⇔Q. Al&shy;though the case ¬Q⇒¬P is ob&shy;vi&shy;ous, the oth&shy;er way around isn’t (at
+least to me). So I post&shy;ed the fol&shy;low&shy;ing ques&shy;tion on Math Stack&shy;Ex&shy;change:
+<a href="https://math.stackexchange.com/questions/1723048/project-euler-106-necessary-and-sufficient-conditions">Project Eu&shy;ler 106: Nec&shy;es&shy;sary and Suf&shy;fi&shy;cient
+Con&shy;di&shy;tions</a>.</p>
+</section>
+</section>
+<section id="rust">
+<h2>Rust</h2>
+<section id="problem-23">
+<h3>Problem 23</h3>
+<blockquote>
+<p>A per&shy;fect num&shy;ber is a num&shy;ber for which the sum of its prop&shy;er
+di&shy;vi&shy;sors is ex&shy;act&shy;ly equal to the num&shy;ber. For ex&shy;am&shy;ple, the sum of the
+prop&shy;er di&shy;vi&shy;sors of 28 would be 1 + 2 + 4 + 7 + 14 = 28, which means
+that 28 is a per&shy;fect num&shy;ber.</p>
+<p>A num&shy;ber n is called de&shy;fi&shy;cient if the sum of its prop&shy;er di&shy;vi&shy;sors is
+less than n and it is called abun&shy;dant if this sum ex&shy;ceeds n.</p>
+<p>As 12 is the small&shy;est abun&shy;dant num&shy;ber, 1 + 2 + 3 + 4 + 6 = 16, the
+small&shy;est num&shy;ber that can be writ&shy;ten as the sum of two abun&shy;dant
+num&shy;bers is 24. By math&shy;e&shy;mat&shy;i&shy;cal anal&shy;y&shy;sis, it can be shown that all
+in&shy;te&shy;gers greater than 28123 can be writ&shy;ten as the sum of two
+abun&shy;dant num&shy;bers. How&shy;ev&shy;er, this up&shy;per lim&shy;it can&shy;not be re&shy;duced any
+fur&shy;ther by anal&shy;y&shy;sis even though it is known that the great&shy;est num&shy;ber
+that can&shy;not be ex&shy;pressed as the sum of two abun&shy;dant num&shy;bers is less
+than this lim&shy;it.</p>
+<p>Find the sum of all the pos&shy;i&shy;tive in&shy;te&shy;gers which can&shy;not be writ&shy;ten as
+the sum of two abun&shy;dant num&shy;bers.</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 23 (0.25s):</p>
+<pre class="m-code"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">LIM</span>: <span class="kt">usize</span> <span class="o">=</span><span class="w"> </span><span class="mi">28123</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">abundant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="kc">true</span><span class="p">;</span><span class="w"> </span><span class="n">LIM</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">LIM</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">LIM</span><span class="o">+</span><span class="mi">1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">LIM</span><span class="o">/</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">sum</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">sum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">abundant</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="c1">//let mut x = Vec::new();</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">expressible_as_sum_of_two_abundant_nos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">LIM</span><span class="o">+</span><span class="mi">1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">abundant</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">abundant</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">expressible_as_sum_of_two_abundant_nos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">expressible_as_sum_of_two_abundant_nos</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="c1">//x.push(i);</span>
+<span class="w">            </span><span class="n">y</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">expressible_as_sum_of_two_abundant_nos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/*println!(&quot;{:?}&quot;, abundant.iter().enumerate()</span>
+<span class="cm">        .filter(|&amp;(i, &amp;a)| a).map(|(i,&amp;a)| i)</span>
+<span class="cm">        .collect::&lt;Vec&lt;_&gt;&gt;());</span>
+<span class="cm">    println!(&quot;{:?}&quot;, x);*/</span><span class="w"></span>
+<span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;{:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></pre>
+<p>Notes: The <code>mut</code> marks mu&shy;ta&shy;ble vari&shy;ables. <code>vec!</code> cre&shy;ates vec&shy;tors
+(grow&shy;able but ar&shy;ray-like). The <code>..</code> syn&shy;tax ex&shy;press&shy;es ranges (low&shy;er
+bound in&shy;clu&shy;sive, up&shy;per bound ex&shy;clu&shy;sive). I have left some com&shy;ments while
+de&shy;bug&shy;ging for <code>x</code>.</p>
+</section>
+<section id="problem-40">
+<h3>Problem 40</h3>
+<blockquote>
+<p>An ir&shy;ra&shy;tional dec&shy;i&shy;mal frac&shy;tion is cre&shy;at&shy;ed by con&shy;cate&shy;nat&shy;ing the
+pos&shy;i&shy;tive in&shy;te&shy;gers:</p>
+<p>0.123456789101112131415161718192021…</p>
+<p>It can be seen that the 12th dig&shy;it of the frac&shy;tion&shy;al part is 1.</p>
+<p>If dn rep&shy;re&shy;sents the nth dig&shy;it of the frac&shy;tion&shy;al part, find the
+val&shy;ue of the fol&shy;low&shy;ing ex&shy;pres&shy;sion.</p>
+<p>d1 x d10 x d100 x d1000 x d10000 x d100000 x d1000000</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 40 (0.26s):</p>
+<pre class="m-code"><span class="k">fn</span> <span class="nf">main</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">max</span>: <span class="kt">usize</span> <span class="o">=</span><span class="w"> </span><span class="mi">1_000_000</span><span class="p">;</span><span class="w"> </span><span class="c1">// 1 million</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">v</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">i64</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">max</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">ind</span>: <span class="kt">usize</span> <span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">max</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="mi">7</span><span class="p">).</span><span class="n">rev</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i64</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="mi">10</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i64</span><span class="p">).</span><span class="n">pow</span><span class="p">(</span><span class="n">j</span><span class="p">))</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">v</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i64</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mi">10</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i64</span><span class="p">).</span><span class="n">pow</span><span class="p">(</span><span class="n">j</span><span class="p">))</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="n">ind</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ind</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">ind</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">max</span><span class="w"> </span><span class="p">{</span><span class="k">break</span><span class="p">;}</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">ind</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">max</span><span class="w"> </span><span class="p">{</span><span class="k">break</span><span class="p">;}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;{:?} {:?} {:?} {:?} {:?} {:?} {:?}&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">10</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">100</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">1000</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">10000</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">100000</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">1000000</span><span class="o">-</span><span class="mi">1</span><span class="p">]);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></pre>
+<p>Notes: <code>usize</code>, <code>i64</code> are types. <code>_</code> can be used as a sep&shy;a&shy;ra&shy;tor
+for clar&shy;i&shy;ty. <code>rev</code> re&shy;vers&shy;es an it&shy;er&shy;a&shy;tor. <code>pow</code> com&shy;putes in&shy;te&shy;ger
+pow&shy;ers. All the dig&shy;its are print&shy;ed sep&shy;a&shy;rate&shy;ly.</p>
+</section>
+<section id="problem-549">
+<h3>Problem 549</h3>
+<blockquote>
+<p>The small&shy;est num&shy;ber m such that 10 di&shy;vides m! is m=5. The small&shy;est
+num&shy;ber m such that 25 di&shy;vides m! is m=10.</p>
+<p>Let s(n) be the small&shy;est num&shy;ber m such that n di&shy;vides m!.</p>
+<p>So s(10)=5 and s(25)=10.</p>
+<p>Let S(n) be ∑s(i) for 2 ≤ i ≤ n.</p>
+<p>S(100)=2012.</p>
+<p>Find S(108).</p>
+</blockquote>
+<p>So&shy;lu&shy;tion to prob&shy;lem 549 (39s):</p>
+<pre class="m-code"><span class="cp">#![feature(iter_arith)]</span><span class="w"></span>
+
+<span class="c1">// Checks if p_j divides factorial(base)/div</span>
+<span class="k">fn</span> <span class="nf">rem0</span><span class="p">(</span><span class="n">base</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">div</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">p_j</span>: <span class="kt">usize</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span> <span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">div</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">p_j</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">count</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">val</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">p_j</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">count2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">base</span><span class="o">/</span><span class="n">p_j</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">count2</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">count2</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">z</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">p_j</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">count2</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="n">val</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="n">p_j</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">count2</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">count</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">LIM</span>: <span class="kt">usize</span> <span class="o">=</span><span class="w"> </span><span class="mi">100_000_000</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">stuff</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">usize</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="n">LIM</span><span class="p">,</span><span class="mi">0</span><span class="p">];</span><span class="w"> </span><span class="n">LIM</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// lowest prime divisor and value of s(i)</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">LIM</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">LIM</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// number must be prime</span>
+<span class="w">            </span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">LIM</span><span class="o">/</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="o">/</span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">rem0</span><span class="p">(</span><span class="n">stuff</span><span class="p">[</span><span class="n">val</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">val</span><span class="p">,</span><span class="w"> </span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stuff</span><span class="p">[</span><span class="n">val</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">stuff</span><span class="p">[</span><span class="n">val</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">stuff</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">sum</span>: <span class="kt">usize</span> <span class="o">=</span><span class="w"> </span><span class="n">stuff</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">v</span><span class="o">|</span><span class="w"> </span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]).</span><span class="n">sum</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;{:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">sum</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></pre>
+<p>Notes: Al&shy;though fair&shy;ly sim&shy;ple, this is prob&shy;a&shy;bly the big&shy;gest so&shy;lu&shy;tion
+I’ve writ&shy;ten.</p>
+</section>
+</section>
+<section id="epilogue">
+<h2>Epilogue</h2>
+<p>Some time af&shy;ter solv&shy;ing the ten prob&shy;lems men&shy;tioned above, Al&shy;ice wrote
+the fol&shy;low&shy;ing let&shy;ter to Bob:</p>
+<blockquote>
+<p>Bob,</p>
+<p>You were right about all the pro&shy;gram&shy;ming lan&shy;guages be&shy;ing fun in
+their own way.</p>
+<ul class="simple">
+<li>Haskell: This one is prob&shy;a&shy;bly my favourite as the no&shy;ta&shy;tion is
+very sim&shy;i&shy;lar to math and it ex&shy;press&shy;es in&shy;tent very clear&shy;ly,
+es&shy;pe&shy;cial&shy;ly since you don’t have mu&shy;ta&shy;tion. Once I fig&shy;ured out the
+struc&shy;ture of the pro&shy;gram, writ&shy;ing Haskell code was very easy.
+How&shy;ev&shy;er, I did have some trou&shy;ble writ&shy;ing the pseu&shy;docode it&shy;self
+(ex&shy;am&shy;ple: the Fi&shy;bonac&shy;ci list con&shy;struc&shy;tion).</li>
+<li>Python: The code reads very much like pseu&shy;docode, which is
+per&shy;haps its big&shy;gest strength. Def&shy;i&shy;nite&shy;ly the eas&shy;i&shy;est to use for
+string ma&shy;nip&shy;u&shy;la&shy;tion and sim&shy;plic&shy;i&shy;ty over&shy;all.</li>
+<li>Rust: For my pur&shy;pos&shy;es, Rust seems a bit too ver&shy;bose. De&shy;spite
+that, the code is easy to read. Al&shy;so all the code that I wrote
+ran very fast with&shy;out much has&shy;sle.</li>
+</ul>
+<p>Bye,</p>
+<p>A</p>
+</blockquote>
+<p>Bob was pleas&shy;ant&shy;ly sur&shy;prised. While he had hoped that Al&shy;ice would try
+all the three, he cer&shy;tain&shy;ly hadn’t ex&shy;pect&shy;ed that she would do so. Here’s
+what he wrote back:</p>
+<blockquote>
+<p>Hi Al&shy;ice,</p>
+<p>I’m hap&shy;py that you en&shy;joyed your so&shy;journ in the land of pro&shy;gram&shy;ming
+lan&shy;guages. There are a great many more lan&shy;guages out there, from the
+weird and es&shy;o&shy;ter&shy;ic to the te&shy;dious and mun&shy;dane.</p>
+<p>Even for the three lan&shy;guages you’ve tried, I think you’ve just
+touched the prover&shy;bial tip of the ice&shy;berg here, es&shy;pe&shy;cial&shy;ly since you
+were pri&shy;mar&shy;i&shy;ly con&shy;cerned with solv&shy;ing math prob&shy;lems. For a work&shy;ing
+pro&shy;gram&shy;mer, there are many more use&shy;ful fea&shy;tures that these lan&shy;guages
+pro&shy;vide than those you’ve just seen:</p>
+<ul class="simple">
+<li>Haskell:
+<a href="https://en.wikipedia.org/wiki/Purely_functional">Pu&shy;ri&shy;ty</a>
+makes de&shy;bug&shy;ging much eas&shy;i&shy;er. Best of all, there is
+<a href="https://www.haskell.org/hoogle/?hoogle=">Hoogle</a> is su&shy;per
+help&shy;ful where you can search for func&shy;tions; for ex&shy;am&shy;ple, you can
+do a re&shy;verse look-up for func&shy;tion names us&shy;ing on&shy;ly the type
+sig&shy;na&shy;ture.</li>
+<li>Python: You have sev&shy;er&shy;al use&shy;ful li&shy;braries to do a va&shy;ri&shy;ety of
+tasks. For ex&shy;am&shy;ple, you can use
+<code>`matplotlib</code> &lt;<a href="http://matplotlib.org/">http://mat&shy;plotlib.org/</a>&gt;`__ to make plots,
+<code>`sympy</code> &lt;<a href="http://www.sympy.org/en/index.html">http://www.sympy.org/en/in&shy;dex.html</a>&gt;`__ to do sym&shy;bol&shy;ic
+cal&shy;cu&shy;la&shy;tions and <code>`numpy</code> &lt;<a href="http://www.numpy.org/">http://www.numpy.org/</a>&gt;`__ for
+nu&shy;mer&shy;ics. Al&shy;so, there are a very large num&shy;ber of python ques&shy;tions
+on Stack&shy;Over&shy;flow asked by be&shy;gin&shy;ners.</li>
+<li>Rust: You’ve got sup&shy;port for au&shy;to&shy;mat&shy;ic doc&shy;u&shy;men&shy;ta&shy;tion with <code>///</code>
+and runnable ex&shy;am&shy;ples in com&shy;ments as well. The de&shy;fault
+in&shy;stal&shy;la&shy;tion al&shy;so comes with a pack&shy;age man&shy;ag&shy;er
+<a href="http://doc.crates.io/">Car&shy;go</a> which makes in&shy;stalling
+de&shy;pen&shy;den&shy;cies a breeze. Safe Rust al&shy;so pre&shy;vents da&shy;ta races. The
+best part about the lan&shy;guage is the com&shy;mu&shy;ni&shy;ty which is very
+friend&shy;ly to be&shy;gin&shy;ners. Check them out on
+<a href="https://www.reddit.com/r/rust">/r/rust</a> and
+<a href="https://chat.mibbit.com/?server=irc.mozilla.org%3A%2B6697&amp;channel=%23rust">#rust</a>.</li>
+</ul>
+<p>Best,</p>
+<p>Bob</p>
+</blockquote>
+<p>As Al&shy;ice stepped off her com&shy;put&shy;er af&shy;ter read&shy;ing Bob’s email, she
+re&shy;alised that she hadn’t even start&shy;ed work&shy;ing on the project.</p>
+<hr class="docutils" />
+<p>P.S. At the time of writ&shy;ing, the Rust syn&shy;tax high&shy;light&shy;ing is not
+per&shy;fect. This is an is&shy;sue with the syn&shy;tax high&shy;lighter that Github Pages
+us&shy;es: Rouge. See the
+<a href="https://github.com/jneen/rouge/issues/287">is&shy;sue</a> and a par&shy;tial fix
+<a href="https://github.com/jneen/rouge/pull/452">here</a>.</p>
+</section>
+<!-- /content -->
+      <footer>
+        <p>Posted by <a href="https://theindigamer.github.io/author/varun-gandhi.html">Varun Gandhi</a> on <time datetime="2016-05-31T00:00:00-05:00">Tue 31 May 2016</time> in <a href="https://theindigamer.github.io/category/programming.html ">programming</a>. Tags: <a href="https://theindigamer.github.io/tag/haskell.html">haskell</a>, <a href="https://theindigamer.github.io/tag/rust.html">rust</a>, <a href="https://theindigamer.github.io/tag/python.html">python</a>, <a href="https://theindigamer.github.io/tag/project-euler.html">project euler</a>.</p>
+      </footer>
+    </article>
+    <nav class="m-navpanel m-col-m-2">
+      <h3>Cate&shy;gories</h3>
+      <ol class="m-block-bar-m">
+        <li><a href="https://theindigamer.github.io/category/fiction.html">fic&shy;tion</a></li>
+        <li><a href="https://theindigamer.github.io/category/grad-school.html">grad school</a></li>
+        <li><a href="https://theindigamer.github.io/category/misc.html">misc</a></li>
+        <li><a href="https://theindigamer.github.io/category/movies.html">movies</a></li>
+        <li><a href="https://theindigamer.github.io/category/programming.html">pro&shy;gram&shy;ming</a></li>
+      </ol>
+      <h3>Tag cloud</h3>
+      <ul class="m-tagcloud">
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/haskell.html">haskell</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/languages.html">languages</a></li>
+        <li class="m-tag-5"><a href="https://theindigamer.github.io/tag/math.html">math</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/ocaml.html">ocaml</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/ordinals.html">ordinals</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/piet.html">piet</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/programming.html">programming</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/project-euler.html">project euler</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/python.html">python</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/rust.html">rust</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/spirited-away.html">spirited away</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/studio-ghibli.html">studio ghibli</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+</main>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-s-3 m-col-t-6">
+      </div>
+      <div class="m-col-s-3 m-col-t-6">
+      </div>
+      <div class="m-clearfix-t"></div>
+      <div class="m-col-s-3 m-col-t-6">
+      </div>
+      <div class="m-col-s-3 m-col-t-6">
+      </div>
+    </div>
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Copy&shy;right © 2017
+          Varun Gand&shy;hi
+          - Text li&shy;censed un&shy;der <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY SA 4.0</a>
+          and Code li&shy;censed un&shy;der <a href="https://opensource.org/licenses/MIT">MIT</a>
+          un&shy;less ex&shy;plic&shy;it&shy;ly stat&shy;ed oth&shy;er&shy;wise
+          - Pow&shy;ered by <a href="https://getpelican.com">Pel&shy;i&shy;can</a> and
+          <a href="http://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

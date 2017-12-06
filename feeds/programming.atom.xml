@@ -1,0 +1,969 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Nocturne in Code and Prose - programming</title><link href="https://theindigamer.github.io/" rel="alternate"></link><link href="https://theindigamer.github.io/feeds/programming.atom.xml" rel="self"></link><id>https://theindigamer.github.io/</id><updated>2017-07-15T00:00:00-05:00</updated><entry><title>Making numbers quickly in Piet</title><link href="https://theindigamer.github.io/making-numbers-quickly-in-piet.html" rel="alternate"></link><published>2017-07-15T00:00:00-05:00</published><updated>2017-07-15T00:00:00-05:00</updated><author><name>Varun Gandhi</name></author><id>tag:theindigamer.github.io,2017-07-15:/making-numbers-quickly-in-piet.html</id><summary type="html">&lt;p&gt;Piet is a stack based es&amp;shy;o&amp;shy;ter&amp;shy;ic pro&amp;shy;gram&amp;shy;ming lan&amp;shy;guage with a rel&amp;shy;a&amp;shy;tive&amp;shy;ly
+sim&amp;shy;ple set of in&amp;shy;struc&amp;shy;tions. At&amp;shy;tempt&amp;shy;ing to make ar&amp;shy;bi&amp;shy;trar&amp;shy;i&amp;shy;ly large num&amp;shy;bers us&amp;shy;ing
+as few op&amp;shy;er&amp;shy;a&amp;shy;tions as pos&amp;shy;si&amp;shy;ble is an in&amp;shy;ter&amp;shy;est&amp;shy;ing prob&amp;shy;lem in this con&amp;shy;text.
+We can use dy&amp;shy;nam&amp;shy;ic pro&amp;shy;gram&amp;shy;ming – in the form of depth-first search +
+mem&amp;shy;o&amp;shy;iza&amp;shy;tion – to ob&amp;shy;tain these op&amp;shy;ti&amp;shy;mal in&amp;shy;struc&amp;shy;tion se&amp;shy;quences.&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;(Note: This ar&amp;shy;ti&amp;shy;cle is based on my ex&amp;shy;pe&amp;shy;ri&amp;shy;ence ask&amp;shy;ing a
+&lt;a href="https://math.stackexchange.com/questions/2355111/making-numbers-cheaply"&gt;ques&amp;shy;tion&lt;/a&gt;
+on the Math Stack&amp;shy;Ex&amp;shy;change and com&amp;shy;ing up with a so&amp;shy;lu&amp;shy;tion based off one
+giv&amp;shy;en in an an&amp;shy;swer. If you on&amp;shy;ly care about the math, just read the
+orig&amp;shy;i&amp;shy;nal ques&amp;shy;tion’s text and skip the first two sec&amp;shy;tions.)&lt;/p&gt;
+&lt;p&gt;1, 2, 3, 4, 5, 8, 7, 11, 13, 22, 41, 44, 94, 176, 177, 472, 697, 1067,
+1391, 3557, 8493, …&lt;/p&gt;
+&lt;section id="background"&gt;
+&lt;h2&gt;Background&lt;/h2&gt;
+&lt;p&gt;&lt;a href="http://www.dangermouse.net/esoteric/piet.html"&gt;Piet&lt;/a&gt; is an es&amp;shy;o&amp;shy;ter&amp;shy;ic
+pro&amp;shy;gram&amp;shy;ming lan&amp;shy;guage where pro&amp;shy;grams take the form of draw&amp;shy;ings (bit&amp;shy;map
+im&amp;shy;ages, to be more pre&amp;shy;cise). In&amp;shy;stead of de&amp;shy;scrib&amp;shy;ing how Piet works, let
+me just de&amp;shy;scribe the rel&amp;shy;e&amp;shy;vant sub&amp;shy;set that we are in&amp;shy;ter&amp;shy;est&amp;shy;ed in.&lt;/p&gt;
+&lt;p&gt;The pro&amp;shy;gram is bro&amp;shy;ken up in&amp;shy;to “codels”. A codel is ba&amp;shy;si&amp;shy;cal&amp;shy;ly a square
+ar&amp;shy;range&amp;shy;ment of pix&amp;shy;els (iden&amp;shy;ti&amp;shy;cal&amp;shy;ly coloured) that rep&amp;shy;re&amp;shy;sents one code
+unit for Piet. A codel may take one of 20 colours – white, black and
+light, medi&amp;shy;um and dark vari&amp;shy;ants of red, green, blue, cyan, ma&amp;shy;gen&amp;shy;ta and
+yel&amp;shy;low.&lt;/p&gt;
+&lt;p&gt;At any giv&amp;shy;en point, the pro&amp;shy;gram is in some codel. A Piet in&amp;shy;ter&amp;shy;preter
+would main&amp;shy;tain a stack (con&amp;shy;tain&amp;shy;ing num&amp;shy;bers) for com&amp;shy;pu&amp;shy;ta&amp;shy;tions. The nor&amp;shy;mal
+push and pop op&amp;shy;er&amp;shy;a&amp;shy;tions are sup&amp;shy;port&amp;shy;ed for the stack. Call&amp;shy;ing an add
+op&amp;shy;er&amp;shy;a&amp;shy;tion would mean pop&amp;shy;ping off the top two val&amp;shy;ues on the stack, adding
+them and push&amp;shy;ing the re&amp;shy;sult back on&amp;shy;to the stack. In post&amp;shy;fix no&amp;shy;ta&amp;shy;tion,
+this is rep&amp;shy;re&amp;shy;sent&amp;shy;ed like [5,6,3,4,+] → [5,6,7] where the top of the
+stack is on the right.&lt;/p&gt;
+&lt;p&gt;Colour blocks are con&amp;shy;tigu&amp;shy;ous (in 2D) se&amp;shy;quences of codels. So colour
+blocks may have size 1 (in codels) or more.&lt;/p&gt;
+&lt;p&gt;Colour tran&amp;shy;si&amp;shy;tions dic&amp;shy;tate what op&amp;shy;er&amp;shy;a&amp;shy;tion ought to be done. For ex&amp;shy;am&amp;shy;ple,
+the tran&amp;shy;si&amp;shy;tion light red → (medi&amp;shy;um) red means that the size of the
+pre&amp;shy;vi&amp;shy;ous (light red) colour block is pushed on&amp;shy;to the stack. For ex&amp;shy;am&amp;shy;ple,
+the fol&amp;shy;low&amp;shy;ing pseu&amp;shy;docode just push&amp;shy;es 3 on&amp;shy;to the stack and ex&amp;shy;its:&lt;/p&gt;
+&lt;pre&gt;lightred lightred lightred red.&lt;/pre&gt;
+&lt;p&gt;(For sim&amp;shy;plic&amp;shy;i&amp;shy;ty, we look on&amp;shy;ly at lin&amp;shy;ear pro&amp;shy;grams – pro&amp;shy;gram flow is from
+left to right.)&lt;/p&gt;
+&lt;p&gt;The math op&amp;shy;er&amp;shy;a&amp;shy;tions sup&amp;shy;port by Piet in&amp;shy;clude {~,+,-,*,/,%,&amp;#64;} where ~ is
+a not op&amp;shy;er&amp;shy;a&amp;shy;tion (0 maps to 1 and the rest map to ze&amp;shy;ro), {+,-,*,/} are
+or&amp;shy;di&amp;shy;nary ad&amp;shy;di&amp;shy;tion, sub&amp;shy;trac&amp;shy;tion, mul&amp;shy;ti&amp;shy;pli&amp;shy;ca&amp;shy;tion and in&amp;shy;te&amp;shy;ger di&amp;shy;vi&amp;shy;sion
+(floored), % is the mod&amp;shy;u&amp;shy;lo op&amp;shy;er&amp;shy;a&amp;shy;tion and &amp;#64; is a unary du&amp;shy;pli&amp;shy;ca&amp;shy;tion
+op&amp;shy;er&amp;shy;a&amp;shy;tion. For ex&amp;shy;am&amp;shy;ple, [13,5,%] → [3] and [3,&amp;#64;,*] → [3,3,*] → [9].&lt;/p&gt;
+&lt;p&gt;(If you are still con&amp;shy;fused about what the heck is go&amp;shy;ing on, then this
+&lt;a href="http://homepages.vub.ac.be/~diddesen/piet/index.html"&gt;Piet tu&amp;shy;to&amp;shy;ri&amp;shy;al&lt;/a&gt;
+might be help&amp;shy;ful. On&amp;shy;ly the sec&amp;shy;tions be&amp;shy;fore “Con&amp;shy;trol&amp;shy;ling the flow” are
+rel&amp;shy;e&amp;shy;vant for un&amp;shy;der&amp;shy;stand&amp;shy;ing the cur&amp;shy;rent ar&amp;shy;ti&amp;shy;cle. You may al&amp;shy;so find
+Wikipedia’s page on &lt;a href="https://en.wikipedia.org/wiki/Reverse_polish_notation"&gt;re&amp;shy;verse pol&amp;shy;ish
+no&amp;shy;ta&amp;shy;tion&lt;/a&gt;
+help&amp;shy;ful.)&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="math-problem"&gt;
+&lt;h2&gt;Math problem&lt;/h2&gt;
+&lt;p&gt;(This sec&amp;shy;tion is a su&amp;shy;per con&amp;shy;densed ver&amp;shy;sion of the
+&lt;a href="https://math.stackexchange.com/questions/2355111/making-numbers-cheaply"&gt;ques&amp;shy;tion&lt;/a&gt;
+post&amp;shy;ed on Stack&amp;shy;Ex&amp;shy;change.)&lt;/p&gt;
+&lt;p&gt;In the ear&amp;shy;li&amp;shy;er ex&amp;shy;am&amp;shy;ple it is clear that push&amp;shy;ing 3 on&amp;shy;to the stack “costs”
+3 tran&amp;shy;si&amp;shy;tions (marked with &lt;code&gt;|&lt;/code&gt;).&lt;/p&gt;
+&lt;pre&gt;lightred | lightred | lightred | red.&lt;/pre&gt;
+&lt;p&gt;From the Piet spec&amp;shy;i&amp;shy;fi&amp;shy;ca&amp;shy;tion, it is easy to de&amp;shy;duce that the min&amp;shy;i&amp;shy;mum cost
+of push&amp;shy;ing a num&amp;shy;ber &lt;em&gt;n&lt;/em&gt; di&amp;shy;rect&amp;shy;ly on&amp;shy;to the stack is ex&amp;shy;act&amp;shy;ly &lt;em&gt;n&lt;/em&gt;
+tran&amp;shy;si&amp;shy;tions. One can al&amp;shy;so de&amp;shy;duce that ap&amp;shy;ply&amp;shy;ing any math op&amp;shy;er&amp;shy;a&amp;shy;tion costs
+1 tran&amp;shy;si&amp;shy;tion.&lt;/p&gt;
+&lt;p&gt;What about in&amp;shy;di&amp;shy;rect&amp;shy;ly push&amp;shy;ing num&amp;shy;bers? For ex&amp;shy;am&amp;shy;ple (with im&amp;shy;plic&amp;shy;it
+push&amp;shy;es), [3,&amp;#64;,&amp;#64;,+,+] ends up (ef&amp;shy;fec&amp;shy;tive&amp;shy;ly) push&amp;shy;ing the num&amp;shy;ber 9 on&amp;shy;to the
+stack with cost 7. How&amp;shy;ev&amp;shy;er [3,&amp;#64;,*] al&amp;shy;so ends up (ef&amp;shy;fec&amp;shy;tive&amp;shy;ly) do&amp;shy;ing the
+same thing but with cost 5.&lt;/p&gt;
+&lt;p&gt;So a nat&amp;shy;u&amp;shy;ral ques&amp;shy;tion to ask is: giv&amp;shy;en a num&amp;shy;ber &lt;em&gt;n&lt;/em&gt; which we’d like to
+push on&amp;shy;to the stack, what is the cheap&amp;shy;est se&amp;shy;quence of op&amp;shy;er&amp;shy;a&amp;shy;tions that
+(ef&amp;shy;fec&amp;shy;tive&amp;shy;ly) does the same thing?&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="stupid-algorithm"&gt;
+&lt;h2&gt;Stupid algorithm&lt;/h2&gt;
+&lt;p&gt;Imag&amp;shy;ine an in&amp;shy;fi&amp;shy;nite &lt;a href="https://en.wikipedia.org/wiki/Trie"&gt;pre&amp;shy;fix tree&lt;/a&gt;
+which con&amp;shy;tains all pos&amp;shy;si&amp;shy;ble le&amp;shy;gal paths. For ex&amp;shy;am&amp;shy;ple, [3,3,-] is a le&amp;shy;gal
+path where&amp;shy;as [3,+] isn’t (there aren’t two num&amp;shy;bers to add). Since
+[3,3,-] is a le&amp;shy;gal path, the tree’s root (emp&amp;shy;ty) has a child node &lt;code&gt;3&lt;/code&gt;
+which has a child node &lt;code&gt;3&lt;/code&gt; which has a child node &lt;code&gt;-&lt;/code&gt; which has
+child nodes &lt;code&gt;{&amp;#64;, 1, 2, 3, ...}&lt;/code&gt; (no bi&amp;shy;na&amp;shy;ry op&amp;shy;er&amp;shy;a&amp;shy;tions are chil&amp;shy;dren of
+&lt;code&gt;-&lt;/code&gt; be&amp;shy;cause that would make an il&amp;shy;le&amp;shy;gal path).&lt;/p&gt;
+&lt;p&gt;Let us al&amp;shy;so put the cor&amp;shy;re&amp;shy;spond&amp;shy;ing (ef&amp;shy;fec&amp;shy;tive) se&amp;shy;quence at the nodes,
+i.e., path [3,&amp;#64;,2,-] will have the se&amp;shy;quences as {[3], [3,3], [3,3,2],
+[3,1]}. The [3,3,2] will be stored at the node with &lt;code&gt;2&lt;/code&gt; and so on.
+While travers&amp;shy;ing this tree, if we see that that the se&amp;shy;quence at our
+cur&amp;shy;rent node is of length 1, say [&lt;em&gt;m&lt;/em&gt;], then the an&amp;shy;ces&amp;shy;tors of the
+cur&amp;shy;rent node (in&amp;shy;clud&amp;shy;ing it&amp;shy;self) de&amp;shy;scribe a can&amp;shy;di&amp;shy;date cheap&amp;shy;est path for
+cre&amp;shy;at&amp;shy;ing &lt;em&gt;m&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;For sim&amp;shy;plic&amp;shy;i&amp;shy;ty, we al&amp;shy;so main&amp;shy;tain the cu&amp;shy;mu&amp;shy;la&amp;shy;tive cost of an&amp;shy;ces&amp;shy;tors
+(in&amp;shy;clud&amp;shy;ing it&amp;shy;self) at the nodes.&lt;/p&gt;
+&lt;p&gt;We do a depth first search of this tree up to some fixed depth (i.e. an
+ar&amp;shy;bi&amp;shy;trar&amp;shy;i&amp;shy;ly cho&amp;shy;sen max&amp;shy;i&amp;shy;mum cost). While search&amp;shy;ing, we main&amp;shy;tain a look up
+ta&amp;shy;ble map&amp;shy;ping se&amp;shy;quences to min&amp;shy;i&amp;shy;mum cost, up&amp;shy;dat&amp;shy;ing as nec&amp;shy;es&amp;shy;sary. If we
+ar&amp;shy;rive at a node where the the se&amp;shy;quence has a saved map&amp;shy;ping, we com&amp;shy;pare
+the costs – if the new cost is equal to or high&amp;shy;er than the saved cost
+then we stop go&amp;shy;ing deep&amp;shy;er in&amp;shy;to the tree. Sim&amp;shy;i&amp;shy;lar&amp;shy;ly, if the cur&amp;shy;rent
+se&amp;shy;quence is too long to shrink to length 1 (us&amp;shy;ing op&amp;shy;er&amp;shy;a&amp;shy;tions) in the
+‘bud&amp;shy;get’ (max cost mi&amp;shy;nus cur&amp;shy;rent cost), then we stop go&amp;shy;ing deep&amp;shy;er.&lt;/p&gt;
+&lt;p&gt;(Yes, I know this al&amp;shy;go&amp;shy;rithm is ex&amp;shy;po&amp;shy;nen&amp;shy;tial; if you have a bet&amp;shy;ter
+so&amp;shy;lu&amp;shy;tion then please get in touch :).)&lt;/p&gt;
+&lt;p&gt;Here is a Ocaml im&amp;shy;ple&amp;shy;men&amp;shy;ta&amp;shy;tion of the al&amp;shy;go&amp;shy;rithm de&amp;shy;scribed above:&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="k"&gt;open&lt;/span&gt; &lt;span class="nc"&gt;Batteries&lt;/span&gt;
+
+&lt;span class="k"&gt;module&lt;/span&gt; &lt;span class="nc"&gt;MakeCheap&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt;
+  &lt;span class="k"&gt;module&lt;/span&gt; &lt;span class="nc"&gt;H&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;BatHashtbl&lt;/span&gt;
+  &lt;span class="k"&gt;module&lt;/span&gt; &lt;span class="nc"&gt;V&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;BatVect&lt;/span&gt;
+
+  &lt;span class="k"&gt;type&lt;/span&gt; &lt;span class="n"&gt;seq&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="kt"&gt;list&lt;/span&gt;
+  &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;int_max&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nn"&gt;BatInt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;max_num&lt;/span&gt;
+  &lt;span class="k"&gt;type&lt;/span&gt; &lt;span class="n"&gt;binary_op&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;PAdd&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PSub&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PMul&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PDiv&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PMod&lt;/span&gt;
+  &lt;span class="k"&gt;type&lt;/span&gt; &lt;span class="n"&gt;elem&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;Number&lt;/span&gt; &lt;span class="k"&gt;of&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PDup&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Binary&lt;/span&gt; &lt;span class="k"&gt;of&lt;/span&gt; &lt;span class="n"&gt;binary_op&lt;/span&gt;
+  &lt;span class="k"&gt;type&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;elem&lt;/span&gt; &lt;span class="kt"&gt;list&lt;/span&gt;
+
+  &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;string_of_elem&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Number&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;string_of_int&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PDup&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;@&amp;quot;&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Binary&lt;/span&gt; &lt;span class="nc"&gt;PAdd&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;+&amp;quot;&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Binary&lt;/span&gt; &lt;span class="nc"&gt;PSub&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;-&amp;quot;&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Binary&lt;/span&gt; &lt;span class="nc"&gt;PMul&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;*&amp;quot;&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Binary&lt;/span&gt; &lt;span class="nc"&gt;PDiv&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;/&amp;quot;&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Binary&lt;/span&gt; &lt;span class="nc"&gt;PMod&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;%&amp;quot;&lt;/span&gt;
+
+  &lt;span class="k"&gt;type&lt;/span&gt; &lt;span class="n"&gt;full_history&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;maxc&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;ref&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;best&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;elem&lt;/span&gt; &lt;span class="kt"&gt;list&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="c"&gt;(* number -&amp;gt; (cost, path) *)&lt;/span&gt;
+    &lt;span class="n"&gt;hist&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;seq&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;             &lt;span class="c"&gt;(* sequence -&amp;gt; length of best path *)&lt;/span&gt;
+    &lt;span class="n"&gt;lim&lt;/span&gt;  &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;def&lt;/span&gt;  &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;elem&lt;/span&gt; &lt;span class="kt"&gt;list&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+  &lt;span class="o"&gt;}&lt;/span&gt;
+
+  &lt;span class="k"&gt;type&lt;/span&gt; &lt;span class="n"&gt;path_history&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;cost&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;st_l&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;seq&lt;/span&gt; &lt;span class="kt"&gt;list&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+  &lt;span class="o"&gt;}&lt;/span&gt;
+
+  &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;rec&lt;/span&gt; &lt;span class="n"&gt;branch&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt; &lt;span class="n"&gt;full_h&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;
+      &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;make_kids&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;function&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PDup&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;match&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;st_l&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt;
+            &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="o"&gt;_&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nc"&gt;PDup&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cost&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt;
+            &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="o"&gt;_&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Binary&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+          &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;match&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;st_l&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt;
+              &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="o"&gt;_&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;
+                &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;PMod&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt;
+                   &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;PDiv&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nc"&gt;PMod&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt;
+                &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;ab_op&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;match&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt;
+                    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PAdd&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+                    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PSub&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+                    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PMul&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+                    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PDiv&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+                    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;PMod&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;mod&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+                  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nc"&gt;Binary&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cost&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ab_op&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt;
+              &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="o"&gt;_&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Number&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nc"&gt;Number&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cost&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+                       &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;match&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;st_l&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt;
+                        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="bp"&gt;[]&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+                        &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="o"&gt;_&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;acc&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+      &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;traverse&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;el&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cost&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;seq&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;cost&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;!(&lt;/span&gt;&lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;maxc&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;
+          &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;old_c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;match&lt;/span&gt; &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_option&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hist&lt;/span&gt; &lt;span class="n"&gt;seq&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt;
+            &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Some&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+            &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;None&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;int_max&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+          &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;cost&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="n"&gt;old_c&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;
+          &lt;span class="k"&gt;else&lt;/span&gt;
+            &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="o"&gt;_&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;
+              &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hist&lt;/span&gt; &lt;span class="n"&gt;seq&lt;/span&gt; &lt;span class="n"&gt;cost&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+              &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="n"&gt;seq&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt;
+                &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hd&lt;/span&gt; &lt;span class="n"&gt;seq&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+                &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt; &lt;span class="bp"&gt;()&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt;
+                  &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;old_c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;match&lt;/span&gt; &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_option&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;best&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt;
+                    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;Some&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="o"&gt;_)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;
+                    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nc"&gt;None&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;int_max&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+                  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;cost&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;old_c&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt; &lt;span class="k"&gt;begin&lt;/span&gt;
+                    &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;best&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cost&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;el&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+                    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;old_c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;!(&lt;/span&gt;&lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;maxc&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt;
+                      &lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;maxc&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt;
+                        &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;range&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;`&lt;/span&gt;&lt;span class="nc"&gt;To&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lim&lt;/span&gt;
+                        &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fst&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;best&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+                        &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reduce&lt;/span&gt; &lt;span class="nn"&gt;BatInt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;max&lt;/span&gt;
+                  &lt;span class="k"&gt;end&lt;/span&gt;
+            &lt;span class="k"&gt;in&lt;/span&gt;
+            &lt;span class="n"&gt;branch&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;cost&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cost&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;el&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+                    &lt;span class="n"&gt;st_l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;seq&lt;/span&gt; &lt;span class="o"&gt;::&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;st_l&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;
+      &lt;span class="k"&gt;in&lt;/span&gt;
+
+      &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;not&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_empty&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;st_l&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;
+         &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nn"&gt;BatInt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;max&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hd&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;st_l&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cost&lt;/span&gt;
+         &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="o"&gt;!(&lt;/span&gt;&lt;span class="n"&gt;full_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;maxc&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt; &lt;span class="n"&gt;full_h&lt;/span&gt;
+      &lt;span class="k"&gt;else&lt;/span&gt;
+        &lt;span class="n"&gt;full_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;def&lt;/span&gt;
+        &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fold_left&lt;/span&gt; &lt;span class="n"&gt;make_kids&lt;/span&gt; &lt;span class="bp"&gt;[]&lt;/span&gt;
+        &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fold_left&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;traverse&lt;/span&gt; &lt;span class="n"&gt;path_h&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="n"&gt;full_h&lt;/span&gt;
+
+  &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;find_all_cheaply&lt;/span&gt; &lt;span class="n"&gt;max_num&lt;/span&gt; &lt;span class="n"&gt;goal&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;
+    &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;start_path_h&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;cost&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;[]&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="n"&gt;st_l&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;[]&lt;/span&gt;&lt;span class="o"&gt;;}&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+    &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;start_full_h&lt;/span&gt; &lt;span class="n"&gt;guess&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="n"&gt;best&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;range&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;`&lt;/span&gt;&lt;span class="nc"&gt;To&lt;/span&gt; &lt;span class="n"&gt;goal&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+             &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fun&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;guess&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="bp"&gt;[]&lt;/span&gt;&lt;span class="o"&gt;)))&lt;/span&gt;
+             &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;of_list&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+      &lt;span class="n"&gt;maxc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ref&lt;/span&gt; &lt;span class="n"&gt;guess&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+      &lt;span class="n"&gt;hist&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;create&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+      &lt;span class="n"&gt;def&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="nc"&gt;PDup&lt;/span&gt;&lt;span class="o"&gt;;]&lt;/span&gt;
+            &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;
+               &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fun&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Binary&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;@@&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="nc"&gt;PAdd&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nc"&gt;PSub&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nc"&gt;PMul&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nc"&gt;PDiv&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nc"&gt;PMod&lt;/span&gt;&lt;span class="o"&gt;;]&lt;/span&gt;
+            &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;
+               &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fun&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nc"&gt;Number&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;@@&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;range&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;`&lt;/span&gt;&lt;span class="nc"&gt;To&lt;/span&gt; &lt;span class="n"&gt;max_num&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+      &lt;span class="n"&gt;lim&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;goal&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+
+    &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;rec&lt;/span&gt; &lt;span class="n"&gt;run_branch&lt;/span&gt; &lt;span class="n"&gt;guess&lt;/span&gt; &lt;span class="n"&gt;full_h&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;
+      &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;branch&lt;/span&gt; &lt;span class="n"&gt;start_path_h&lt;/span&gt; &lt;span class="n"&gt;full_h&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+      &lt;span class="c"&gt;(* retry if we didn&amp;#39;t find a path for all numbers from 1 to goal *)&lt;/span&gt;
+      &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;range&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;`&lt;/span&gt;&lt;span class="nc"&gt;To&lt;/span&gt; &lt;span class="n"&gt;goal&lt;/span&gt;
+         &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;((=)&lt;/span&gt; &lt;span class="n"&gt;guess&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="n"&gt;fst&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;best&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+         &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reduce&lt;/span&gt; &lt;span class="o"&gt;(||)&lt;/span&gt; &lt;span class="k"&gt;then&lt;/span&gt;
+        &lt;span class="n"&gt;run_branch&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;guess&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;start_full_h&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;guess&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
+      &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="n"&gt;fh&lt;/span&gt;
+    &lt;span class="k"&gt;in&lt;/span&gt;
+
+    &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="n"&gt;full_h&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;run_branch&lt;/span&gt; &lt;span class="mi"&gt;16&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;start_full_h&lt;/span&gt; &lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt;
+    &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;range&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;`&lt;/span&gt;&lt;span class="nc"&gt;To&lt;/span&gt; &lt;span class="n"&gt;goal&lt;/span&gt;
+    &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fun&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;H&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt; &lt;span class="n"&gt;full_h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;best&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
+    &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fun&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;string_of_elem&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;@@&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rev&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
+    &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sort&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fun&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="o"&gt;,_,_)&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a2&lt;/span&gt;&lt;span class="o"&gt;,_,_)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;compare&lt;/span&gt; &lt;span class="n"&gt;a1&lt;/span&gt; &lt;span class="n"&gt;a2&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="o"&gt;|&amp;gt;&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;
+      &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="k"&gt;fun&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="o"&gt;_&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;print_endline&lt;/span&gt; &lt;span class="o"&gt;@@&lt;/span&gt; &lt;span class="nn"&gt;Printf&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sprintf&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;%5d %2d %s&amp;quot;&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt;
+                        &lt;span class="o"&gt;@@&lt;/span&gt; &lt;span class="nn"&gt;List&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fold_left&lt;/span&gt; &lt;span class="o"&gt;(^)&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;&amp;quot;&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="o"&gt;))&lt;/span&gt;
+
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="o"&gt;_&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nn"&gt;MakeCheap&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_all_cheaply&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt; &lt;span class="mi"&gt;256&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;(I’ve for&amp;shy;bid&amp;shy;den the code from us&amp;shy;ing mod&amp;shy;u&amp;shy;lo in case of neg&amp;shy;a&amp;shy;tive di&amp;shy;vi&amp;shy;sors
+for rea&amp;shy;sons which I don’t want to go in here.)&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="interesting-results"&gt;
+&lt;h2&gt;Interesting (?) results&lt;/h2&gt;
+&lt;p&gt;The full re&amp;shy;sults for 1 to 12,000 are avail&amp;shy;able
+&lt;a href="https://github.com/theindigamer/theindigamer.github.io/blob/e2ce7643d87fcadd4fa90e333bb33cb41b83eca8/data/results-12000.txt"&gt;here&lt;/a&gt;.
+The first col&amp;shy;umn is the num&amp;shy;ber, the sec&amp;shy;ond col&amp;shy;umn is the low&amp;shy;est cost
+pos&amp;shy;si&amp;shy;ble and the last col&amp;shy;umn is one pos&amp;shy;si&amp;shy;ble low&amp;shy;est cost path of
+op&amp;shy;er&amp;shy;a&amp;shy;tions to con&amp;shy;struct the num&amp;shy;ber.&lt;/p&gt;
+&lt;p&gt;The se&amp;shy;quence at the start of the ar&amp;shy;ti&amp;shy;cle rep&amp;shy;re&amp;shy;sents the small&amp;shy;est num&amp;shy;bers
+for a giv&amp;shy;en cost. I’ve put it in a cost -&amp;gt; num&amp;shy;ber for&amp;shy;mat for con&amp;shy;ve&amp;shy;nience
+be&amp;shy;low.&lt;/p&gt;
+&lt;p&gt;1 -&amp;gt; 1, 2 -&amp;gt; 2, 3 -&amp;gt; 3, 4 -&amp;gt; 4, 5 -&amp;gt; 5, 6 -&amp;gt; 8, 7 -&amp;gt; 7, 8 -&amp;gt; 11, 9 -&amp;gt;
+13, 10 -&amp;gt; 22, 11 -&amp;gt; 41, 12 -&amp;gt; 44, 13 -&amp;gt; 94, 14 -&amp;gt; 176, 15 -&amp;gt; 177, 16 -&amp;gt;
+472, 17 -&amp;gt; 697, 18 -&amp;gt; 1067, 19 -&amp;gt; 1391, 20 -&amp;gt; 3557, 21 -&amp;gt; 8493, …&lt;/p&gt;
+&lt;p&gt;(Al&amp;shy;so, I have the sus&amp;shy;pi&amp;shy;cion that the first cost 22 num&amp;shy;ber is be&amp;shy;tween
+12,000 and 16,000 giv&amp;shy;en that my lap&amp;shy;top ran out of swap space for 16,000
+:neu&amp;shy;tral_&amp;shy;face:.)&lt;/p&gt;
+&lt;p&gt;This da&amp;shy;ta ana&amp;shy;lyis is eas&amp;shy;i&amp;shy;ly done us&amp;shy;ing Python:&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="kn"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
+&lt;span class="n"&gt;dfo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pd&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read_csv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;results-10000.txt&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;delim_whitespace&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;names&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;num&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;cost&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;seq&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+        &lt;span class="n"&gt;header&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;None&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;df&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;dfo&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sort_values&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;by&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;cost&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;num&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;span class="n"&gt;grouped&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;df&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;groupby&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;cost&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;grouped&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;first&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;A scat&amp;shy;ter plot of cost vs num&amp;shy;ber is shown be&amp;shy;low:&lt;/p&gt;
+&lt;figure class="m-figure"&gt;
+&lt;img alt="Plot for cost vs number" src="http://i.imgur.com/AprHYSI.png" /&gt;
+&lt;figcaption&gt;Plot for cost vs num&amp;shy;ber&lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;p&gt;Some oth&amp;shy;er things I found cool (al&amp;shy;though I con&amp;shy;cede some are re&amp;shy;lat&amp;shy;ed to
+the im&amp;shy;plic&amp;shy;it or&amp;shy;der&amp;shy;ing of op&amp;shy;er&amp;shy;a&amp;shy;tions &amp;#64;, +, -, *, /, % in my code):&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;The first num&amp;shy;ber to use di&amp;shy;vi&amp;shy;sion is 187 in [5,&amp;#64;,&amp;#64;,*,*,&amp;#64;,2,/,+]. Out
+of 12,000 paths, 899 use one or more di&amp;shy;vi&amp;shy;sion op&amp;shy;er&amp;shy;a&amp;shy;tions (there are
+910 di&amp;shy;vi&amp;shy;sions in to&amp;shy;tal).&lt;/li&gt;
+&lt;li&gt;Ex&amp;shy;act&amp;shy;ly one num&amp;shy;ber us&amp;shy;es a mod&amp;shy;u&amp;shy;lo op&amp;shy;er&amp;shy;a&amp;shy;tion – it is 9362 with the
+path [4,&amp;#64;,*,&amp;#64;,*,&amp;#64;,*,&amp;#64;,3,&amp;#64;,*,%,/] of cost 18. This gen&amp;shy;er&amp;shy;ates
+65536, du&amp;shy;pli&amp;shy;cates it, does mod 9 (giv&amp;shy;ing 7) and does 65536/7 = 9362
+(floored). Wow.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;(Python code for check&amp;shy;ing sub&amp;shy;strings:
+&lt;code&gt;dfo[dfo[&amp;quot;seq&amp;quot;].str.contains('/')]&lt;/code&gt;.)&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="get-in-touch"&gt;
+&lt;h2&gt;Get in touch!&lt;/h2&gt;
+&lt;p&gt;If you have any ques&amp;shy;tions or com&amp;shy;ments, please &lt;a href="https://github.com/theindigamer/theindigamer.github.io/issues"&gt;open an
+is&amp;shy;sue&lt;/a&gt;
+on this blog’s Github re&amp;shy;po or send me an email: &lt;code&gt;theindigamer15&lt;/code&gt;
+(gmail). 😄&lt;/p&gt;
+&lt;/section&gt;
+</content><category term="piet"></category><category term="math"></category><category term="ocaml"></category></entry><entry><title>Alice’s Adventures with Project Euler</title><link href="https://theindigamer.github.io/alices-adventures-with-project-euler.html" rel="alternate"></link><published>2016-05-31T00:00:00-05:00</published><updated>2016-05-31T00:00:00-05:00</updated><author><name>Varun Gandhi</name></author><id>tag:theindigamer.github.io,2016-05-31:/alices-adventures-with-project-euler.html</id><summary type="html">&lt;p&gt;Af&amp;shy;ter her ad&amp;shy;ven&amp;shy;tures in the strange and es&amp;shy;o&amp;shy;ter&amp;shy;ic Won&amp;shy;der&amp;shy;land, Al&amp;shy;ice
+was in a bad mood. She re&amp;shy;fused to ven&amp;shy;ture out&amp;shy;side, lest she fall in&amp;shy;to a
+rab&amp;shy;bit hole again. In&amp;shy;stead, she would sit in front of the com&amp;shy;put&amp;shy;er all day,
+read&amp;shy;ing all there was to read on the in&amp;shy;ter&amp;shy;net. One of her favourite pas&amp;shy;times
+was to read about math&amp;shy;e&amp;shy;mat&amp;shy;ics…&lt;/p&gt;
+</summary><content type="html">&lt;section id="prologue"&gt;
+&lt;h2&gt;Prologue&lt;/h2&gt;
+&lt;p&gt;Af&amp;shy;ter her ad&amp;shy;ven&amp;shy;tures in the strange and es&amp;shy;o&amp;shy;ter&amp;shy;ic Won&amp;shy;der&amp;shy;land, Al&amp;shy;ice was
+in a bad mood. She re&amp;shy;fused to ven&amp;shy;ture out&amp;shy;side, lest she fall in&amp;shy;to a
+rab&amp;shy;bit hole again. In&amp;shy;stead, she would sit in front of the com&amp;shy;put&amp;shy;er all
+day, read&amp;shy;ing all there was to read on the in&amp;shy;ter&amp;shy;net. One of her favourite
+pas&amp;shy;times was to read about math&amp;shy;e&amp;shy;mat&amp;shy;ics. Her fa&amp;shy;ther, ev&amp;shy;er so keen on
+turn&amp;shy;ing Al&amp;shy;ice in&amp;shy;to a prop&amp;shy;er la&amp;shy;dy, ap&amp;shy;point&amp;shy;ed a gov&amp;shy;erness to teach her
+lit&amp;shy;er&amp;shy;a&amp;shy;ture, his&amp;shy;to&amp;shy;ry and phi&amp;shy;los&amp;shy;o&amp;shy;phy. Al&amp;shy;ice would of&amp;shy;ten fight with the
+gov&amp;shy;erness; the gov&amp;shy;erness would make her read Hegel and Kierkegaard,
+where&amp;shy;as Al&amp;shy;ice was much more in&amp;shy;ter&amp;shy;est&amp;shy;ed in the works of Bertrand Rus&amp;shy;sell
+and Wittgen&amp;shy;stein.&lt;/p&gt;
+&lt;p&gt;For ev&amp;shy;ery lit&amp;shy;tle task the gov&amp;shy;erness as&amp;shy;signed to Al&amp;shy;ice, Al&amp;shy;ice would do
+the ex&amp;shy;act op&amp;shy;po&amp;shy;site if it were pos&amp;shy;si&amp;shy;ble to do so. Fi&amp;shy;nal&amp;shy;ly, the gov&amp;shy;erness
+was fed up. She told Al&amp;shy;ice, “I will give you per&amp;shy;mis&amp;shy;sion to study the
+life and work of any one per&amp;shy;son you may de&amp;shy;sire. It may even be a
+math&amp;shy;e&amp;shy;ma&amp;shy;ti&amp;shy;cian (hmph!). How&amp;shy;ev&amp;shy;er, you must pre&amp;shy;pare a thor&amp;shy;ough re&amp;shy;port
+de&amp;shy;scrib&amp;shy;ing ev&amp;shy;ery&amp;shy;thing you’ve read about that per&amp;shy;son, no short&amp;shy;er than
+thir&amp;shy;ty pages.” Al&amp;shy;ice was not amused. How&amp;shy;ev&amp;shy;er, she grudg&amp;shy;ing&amp;shy;ly ac&amp;shy;cept&amp;shy;ed.
+Af&amp;shy;ter all, 1 &amp;gt; 0. Of course, that doesn’t mean that she in&amp;shy;tend&amp;shy;ed to
+write the re&amp;shy;port by her&amp;shy;self. As all good stu&amp;shy;dents do, she first checked
+whether such a re&amp;shy;port was al&amp;shy;ready avail&amp;shy;able on the in&amp;shy;ter&amp;shy;net. Since Eu&amp;shy;ler
+was her favourite math&amp;shy;e&amp;shy;ma&amp;shy;ti&amp;shy;cian (he was the first one to solve the Basel
+prob&amp;shy;lem!), she typed in “Eu&amp;shy;ler project re&amp;shy;port” and hit the first
+&lt;a href="https://projecteuler.net"&gt;link&lt;/a&gt; she en&amp;shy;coun&amp;shy;tered with&amp;shy;out think&amp;shy;ing too
+much. It said:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;What is Project Eu&amp;shy;ler?&lt;/p&gt;
+&lt;p&gt;Project Eu&amp;shy;ler is a se&amp;shy;ries of chal&amp;shy;leng&amp;shy;ing math&amp;shy;e&amp;shy;mat&amp;shy;i&amp;shy;cal/com&amp;shy;put&amp;shy;er
+pro&amp;shy;gram&amp;shy;ming prob&amp;shy;lems that will re&amp;shy;quire more than just math&amp;shy;e&amp;shy;mat&amp;shy;i&amp;shy;cal
+in&amp;shy;sights to solve. Al&amp;shy;though math&amp;shy;e&amp;shy;mat&amp;shy;ics will help you ar&amp;shy;rive at
+el&amp;shy;e&amp;shy;gant and ef&amp;shy;fi&amp;shy;cient meth&amp;shy;ods, the use of a com&amp;shy;put&amp;shy;er and pro&amp;shy;gram&amp;shy;ming
+skills will be re&amp;shy;quired to solve most prob&amp;shy;lems.&lt;/p&gt;
+&lt;p&gt;The mo&amp;shy;ti&amp;shy;va&amp;shy;tion for start&amp;shy;ing Project Eu&amp;shy;ler, and its con&amp;shy;tin&amp;shy;u&amp;shy;a&amp;shy;tion, is
+to pro&amp;shy;vide a plat&amp;shy;form for the in&amp;shy;quir&amp;shy;ing mind to delve in&amp;shy;to
+un&amp;shy;fa&amp;shy;mil&amp;shy;iar ar&amp;shy;eas and learn new con&amp;shy;cepts in a fun and recre&amp;shy;ation&amp;shy;al
+con&amp;shy;text.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Al&amp;shy;ice’s in&amp;shy;ter&amp;shy;est was slight&amp;shy;ly piqued. She loved chal&amp;shy;leng&amp;shy;ing math&amp;shy;e&amp;shy;mat&amp;shy;i&amp;shy;cal
+prob&amp;shy;lems but she didn’t know pro&amp;shy;gram&amp;shy;ming. Her friend Bob did. So she
+wrote the fol&amp;shy;low&amp;shy;ing email to Bob:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Bob,&lt;/p&gt;
+&lt;p&gt;I’ve stum&amp;shy;bled across this site called Project Eu&amp;shy;ler. Do you know
+about it? It has a large num&amp;shy;ber of nice math&amp;shy;e&amp;shy;mat&amp;shy;ics/pro&amp;shy;gram&amp;shy;ming
+prob&amp;shy;lems. Can you rec&amp;shy;om&amp;shy;mend a fun pro&amp;shy;gram&amp;shy;ming lan&amp;shy;guage to learn for
+solv&amp;shy;ing them? I’ll pick up the de&amp;shy;tails from tu&amp;shy;to&amp;shy;ri&amp;shy;als on&amp;shy;line (duh!),
+but I just need a sug&amp;shy;ges&amp;shy;tion to get start&amp;shy;ed.&lt;/p&gt;
+&lt;p&gt;Bye,&lt;/p&gt;
+&lt;p&gt;A&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Bob was sur&amp;shy;prised. Al&amp;shy;ice gen&amp;shy;er&amp;shy;al&amp;shy;ly ex&amp;shy;pressed dis&amp;shy;taste for us&amp;shy;ing ex&amp;shy;ter&amp;shy;nal
+aid in solv&amp;shy;ing prob&amp;shy;lems. He wrote back prompt&amp;shy;ly:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hi Al&amp;shy;ice,&lt;/p&gt;
+&lt;p&gt;Oh, so you’ve fi&amp;shy;nal&amp;shy;ly writ&amp;shy;ten to me about pro&amp;shy;gram&amp;shy;ming. De&amp;shy;spite all
+the arith&amp;shy;metic you can do in your head, I’m hap&amp;shy;py that you’ve
+re&amp;shy;al&amp;shy;ized that this is too much for you. Un&amp;shy;for&amp;shy;tu&amp;shy;nate&amp;shy;ly, giv&amp;shy;en that
+there are so many fun pro&amp;shy;gram&amp;shy;ming lan&amp;shy;guages out there, it is hard to
+rec&amp;shy;om&amp;shy;mend just one. So I’ve se&amp;shy;lect&amp;shy;ed three (amongst the many I know
+:P) that you’ll prob&amp;shy;a&amp;shy;bly en&amp;shy;joy. In no par&amp;shy;tic&amp;shy;u&amp;shy;lar or&amp;shy;der,&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Haskell: Per&amp;shy;fect for bud&amp;shy;ding math&amp;shy;e&amp;shy;ma&amp;shy;ti&amp;shy;cians. I know you’ll love
+it.&lt;/li&gt;
+&lt;li&gt;Python: You might want to start with this for a gen&amp;shy;tle
+in&amp;shy;tro&amp;shy;duc&amp;shy;tion to pro&amp;shy;gram&amp;shy;ming :P.&lt;/li&gt;
+&lt;li&gt;Rust: This one is hard to de&amp;shy;scribe to a non-pro&amp;shy;gram&amp;shy;mer like you
+:-/. Just read the of&amp;shy;fi&amp;shy;cial de&amp;shy;scrip&amp;shy;tion.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Let me know which one you like the most!&lt;/p&gt;
+&lt;p&gt;Best,&lt;/p&gt;
+&lt;p&gt;Bob&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Fi&amp;shy;nal&amp;shy;ly, Al&amp;shy;ice set out to ran&amp;shy;dom&amp;shy;ly solve a few prob&amp;shy;lems from the Project
+Eu&amp;shy;ler data&amp;shy;base. She tried all the lan&amp;shy;guages that Bob had sug&amp;shy;gest&amp;shy;ed. She
+al&amp;shy;so tried solv&amp;shy;ing some prob&amp;shy;lems us&amp;shy;ing mul&amp;shy;ti&amp;shy;ple lan&amp;shy;guages. While sev&amp;shy;er&amp;shy;al
+of the prob&amp;shy;lems were triv&amp;shy;ial&amp;shy;ly easy, she was dili&amp;shy;gent enough to write
+down short notes for all the prob&amp;shy;lems de&amp;shy;scrib&amp;shy;ing the syn&amp;shy;tax and her
+pro&amp;shy;gram&amp;shy;ming ex&amp;shy;pe&amp;shy;ri&amp;shy;ence.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="haskell"&gt;
+&lt;h2&gt;Haskell&lt;/h2&gt;
+&lt;section id="problem-4"&gt;
+&lt;h3&gt;Problem 4&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A palin&amp;shy;dromic num&amp;shy;ber reads the same both ways. The largest
+palin&amp;shy;drome made from the prod&amp;shy;uct of two 2-dig&amp;shy;it num&amp;shy;bers is 9009 = 91
+× 99.&lt;/p&gt;
+&lt;p&gt;Find the largest palin&amp;shy;drome made from the prod&amp;shy;uct of two 3-dig&amp;shy;it
+num&amp;shy;bers.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 4 (0.005s):&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="nf"&gt;palindrome&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;reverse&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;print&lt;/span&gt;
+  &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;maximum&lt;/span&gt;
+    &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filter&lt;/span&gt; &lt;span class="n"&gt;palindrome&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;y1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y2&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="kr"&gt;let&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;999&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;998&lt;/span&gt; &lt;span class="o"&gt;..&lt;/span&gt; &lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;y1&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y2&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: &lt;code&gt;show&lt;/code&gt; con&amp;shy;verts stuff to a &lt;code&gt;string&lt;/code&gt;. &lt;code&gt;filter&lt;/code&gt; fil&amp;shy;ters the
+el&amp;shy;e&amp;shy;ments in the list which give &lt;code&gt;palindrome x == True&lt;/code&gt;. &lt;code&gt;&amp;lt;-&lt;/code&gt;
+rep&amp;shy;re&amp;shy;sents the set mem&amp;shy;ber&amp;shy;ship ∈. The so&amp;shy;lu&amp;shy;tion is re&amp;shy;al&amp;shy;ly clean and easy
+to un&amp;shy;der&amp;shy;stand. I tried rewrit&amp;shy;ing it in Python and Rust lat&amp;shy;er but I like
+the Haskell so&amp;shy;lu&amp;shy;tion the best.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="problem-14"&gt;
+&lt;h3&gt;Problem 14&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The fol&amp;shy;low&amp;shy;ing it&amp;shy;er&amp;shy;a&amp;shy;tive se&amp;shy;quence is de&amp;shy;fined for the set of pos&amp;shy;i&amp;shy;tive
+in&amp;shy;te&amp;shy;gers:&lt;/p&gt;
+&lt;p&gt;n → n/2 (n is even) n → 3n + 1 (n is odd)&lt;/p&gt;
+&lt;p&gt;Us&amp;shy;ing the rule above and start&amp;shy;ing with 13, we gen&amp;shy;er&amp;shy;ate the fol&amp;shy;low&amp;shy;ing
+se&amp;shy;quence: 13 → 40 → 20 → 10 → 5 → 16 → 8 → 4 → 2 → 1&lt;/p&gt;
+&lt;p&gt;It can be seen that this se&amp;shy;quence (start&amp;shy;ing at 13 and fin&amp;shy;ish&amp;shy;ing at
+1) con&amp;shy;tains 10 terms. Al&amp;shy;though it has not been proved yet (Col&amp;shy;latz
+Prob&amp;shy;lem), it is thought that all start&amp;shy;ing num&amp;shy;bers fin&amp;shy;ish at 1.&lt;/p&gt;
+&lt;p&gt;Which start&amp;shy;ing num&amp;shy;ber, un&amp;shy;der one mil&amp;shy;lion, pro&amp;shy;duces the long&amp;shy;est
+chain?&lt;/p&gt;
+&lt;p&gt;NOTE: Once the chain starts the terms are al&amp;shy;lowed to go above one
+mil&amp;shy;lion.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 14 (4.7s):&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="nf"&gt;collatz&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;collatz&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;rem&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="p"&gt;`&lt;/span&gt;&lt;span class="n"&gt;div&lt;/span&gt;&lt;span class="p"&gt;`&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+
+&lt;span class="nf"&gt;collatz_len&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt;
+&lt;span class="nf"&gt;collatz_len&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="nf"&gt;collatz_len&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;collatz_len&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;collatz&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;maximum&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="n"&gt;collatz_len&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;..&lt;/span&gt; &lt;span class="mi"&gt;999999&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: I’ve spec&amp;shy;i&amp;shy;fied the types of func&amp;shy;tions for con&amp;shy;ve&amp;shy;nience. The pipes
+&lt;code&gt;|&lt;/code&gt; act as con&amp;shy;di&amp;shy;tion&amp;shy;al state&amp;shy;ments &lt;code&gt;if&lt;/code&gt;, &lt;code&gt;else&lt;/code&gt; etc. &lt;code&gt;map&lt;/code&gt;
+ap&amp;shy;plies &lt;code&gt;collatz_len&lt;/code&gt; to all el&amp;shy;e&amp;shy;ments of the list. Again, writ&amp;shy;ing the
+code is very straight-for&amp;shy;ward from the prob&amp;shy;lem stat&amp;shy;ment.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="problem-25"&gt;
+&lt;h3&gt;Problem 25&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The Fi&amp;shy;bonac&amp;shy;ci se&amp;shy;quence is de&amp;shy;fined by the re&amp;shy;cur&amp;shy;rence re&amp;shy;la&amp;shy;tion:&lt;/p&gt;
+&lt;p&gt;Fn = Fn−1 + Fn−2 , where F1 = 1 and F2 = 1.&lt;/p&gt;
+&lt;p&gt;Hence the first 12 terms will be:&lt;/p&gt;
+&lt;p&gt;F1 = 1, F2 = 1, F3 = 2, F4 = 3, F5 = 5, F6 = 8, F7 = 13, F8 = 21, F9
+= 34, F10 = 55, F11 = 89, F12 = 144.&lt;/p&gt;
+&lt;p&gt;The 12th term, F12 , is the first term to con&amp;shy;tain three dig&amp;shy;its.&lt;/p&gt;
+&lt;p&gt;What is the in&amp;shy;dex of the first term in the Fi&amp;shy;bonac&amp;shy;ci se&amp;shy;quence to
+con&amp;shy;tain 1000 dig&amp;shy;its?&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 25 (0.26s):&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="nf"&gt;fibs&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Integer&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="nf"&gt;fibs&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;zipWith&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;fibs&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tail&lt;/span&gt; &lt;span class="n"&gt;fibs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;fib&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt;
+&lt;span class="nf"&gt;fib&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fibs&lt;/span&gt; &lt;span class="o"&gt;!!&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;fibdigs&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fib&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filter&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;snd&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="n"&gt;fibdigs&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;..&lt;/span&gt; &lt;span class="p"&gt;])))&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: The Fi&amp;shy;bonac&amp;shy;ci num&amp;shy;bers are arb&amp;shy;trary pre&amp;shy;ci&amp;shy;sion &lt;code&gt;Integer&lt;/code&gt;s.
+&lt;code&gt;zipWith&lt;/code&gt; takes a func&amp;shy;tion &lt;code&gt;f&lt;/code&gt; and two lists and cre&amp;shy;ates a new list
+by ap&amp;shy;ply&amp;shy;ing &lt;code&gt;f&lt;/code&gt; to pairs of el&amp;shy;e&amp;shy;ments. &lt;code&gt;!!&lt;/code&gt; se&amp;shy;lects an el&amp;shy;e&amp;shy;ment from
+the list. &lt;code&gt;==1000&lt;/code&gt; cre&amp;shy;ates a par&amp;shy;tial func&amp;shy;tion. &lt;code&gt;.&lt;/code&gt; de&amp;shy;notes the
+func&amp;shy;tion com&amp;shy;po&amp;shy;si&amp;shy;tion ∘. &lt;code&gt;snd&lt;/code&gt; picks out the sec&amp;shy;ond el&amp;shy;e&amp;shy;ment of a tu&amp;shy;ple.
+Here, we are us&amp;shy;ing an in&amp;shy;fi&amp;shy;nite list &lt;code&gt;[1, 2 .. ]&lt;/code&gt; which is &lt;a href="https://en.wikipedia.org/wiki/Lazy_evaluation"&gt;lazi&amp;shy;ly
+eval&amp;shy;u&amp;shy;at&amp;shy;ed&lt;/a&gt;. As with
+the ear&amp;shy;li&amp;shy;er two prob&amp;shy;lems, writ&amp;shy;ing the code is very easy from the prob&amp;shy;lem
+state&amp;shy;ment with the on&amp;shy;ly clever part be&amp;shy;ing the con&amp;shy;struc&amp;shy;tion of the
+Fi&amp;shy;bonac&amp;shy;ci num&amp;shy;bers.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="problem-104"&gt;
+&lt;h3&gt;Problem 104&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The Fi&amp;shy;bonac&amp;shy;ci se&amp;shy;quence is de&amp;shy;fined by the re&amp;shy;cur&amp;shy;rence re&amp;shy;la&amp;shy;tion:&lt;/p&gt;
+&lt;p&gt;Fn = Fn−1 + Fn−2 , where F1 = 1 and F2 = 1.&lt;/p&gt;
+&lt;p&gt;It turns out that F541 , which con&amp;shy;tains 113 dig&amp;shy;its, is the first
+Fi&amp;shy;bonac&amp;shy;ci num&amp;shy;ber for which the last nine dig&amp;shy;its are 1-9 pandig&amp;shy;i&amp;shy;tal
+(con&amp;shy;tain all the dig&amp;shy;its 1 to 9, but not nec&amp;shy;es&amp;shy;sar&amp;shy;i&amp;shy;ly in or&amp;shy;der). And
+F2749 , which con&amp;shy;tains 575 dig&amp;shy;its, is the first Fi&amp;shy;bonac&amp;shy;ci num&amp;shy;ber for
+which the first nine dig&amp;shy;its are 1-9 pandig&amp;shy;i&amp;shy;tal.&lt;/p&gt;
+&lt;p&gt;Giv&amp;shy;en that Fk is the first Fi&amp;shy;bonac&amp;shy;ci num&amp;shy;ber for which the first nine
+dig&amp;shy;its AND the last nine dig&amp;shy;its are 1-9 pandig&amp;shy;i&amp;shy;tal, find k.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 104 (~41 min):&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Data.Char&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;digitToInt&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;Data.List&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;sort&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;fibs&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Integer&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="nf"&gt;fibs&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="kt"&gt;:&lt;/span&gt;&lt;span class="n"&gt;zipWith&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;fibs&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tail&lt;/span&gt; &lt;span class="n"&gt;fibs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nf"&gt;fib&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt;
+&lt;span class="nf"&gt;fib&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fibs&lt;/span&gt; &lt;span class="o"&gt;!!&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;first_9_digits&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Integer&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="nf"&gt;first_9_digits&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="n"&gt;digitToInt&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;take&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nf"&gt;last_9_digits&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="n"&gt;digitToInt&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;take&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;reverse&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+
+&lt;span class="nf"&gt;pandigital_ends&lt;/span&gt; &lt;span class="ow"&gt;::&lt;/span&gt; &lt;span class="kt"&gt;Int&lt;/span&gt; &lt;span class="ow"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;Int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;Bool&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nf"&gt;pandigital_ends&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;..&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sort&lt;/span&gt; &lt;span class="n"&gt;f9&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;..&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sort&lt;/span&gt; &lt;span class="n"&gt;l9&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;False&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="kr"&gt;where&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;fib&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;
+          &lt;span class="n"&gt;f9&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;first_9_digits&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;
+          &lt;span class="n"&gt;l9&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;last_9_digits&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;
+
+&lt;span class="nf"&gt;main&lt;/span&gt; &lt;span class="ow"&gt;=&lt;/span&gt; &lt;span class="n"&gt;print&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;map&lt;/span&gt; &lt;span class="n"&gt;pandigital_ends&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;..&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;snd&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: The &lt;code&gt;where&lt;/code&gt; clause al&amp;shy;lows short sub&amp;shy;sti&amp;shy;tu&amp;shy;tions, much like
+&lt;code&gt;let&lt;/code&gt; ear&amp;shy;li&amp;shy;er. This so&amp;shy;lu&amp;shy;tion is fair&amp;shy;ly slow prob&amp;shy;a&amp;shy;bly be&amp;shy;cause a lot of
+time is be&amp;shy;ing wast&amp;shy;ed in ac&amp;shy;tu&amp;shy;al&amp;shy;ly eval&amp;shy;u&amp;shy;at&amp;shy;ing all the Fi&amp;shy;bonac&amp;shy;ci num&amp;shy;bers.&lt;/p&gt;
+&lt;/section&gt;
+&lt;/section&gt;
+&lt;section id="python"&gt;
+&lt;h2&gt;Python&lt;/h2&gt;
+&lt;section id="problem-69"&gt;
+&lt;h3&gt;Problem 69&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Eu&amp;shy;ler’s To&amp;shy;tient func&amp;shy;tion, φ(n) [some&amp;shy;times called the phi func&amp;shy;tion],
+is used to de&amp;shy;ter&amp;shy;mine the num&amp;shy;ber of num&amp;shy;bers less than n which are
+rel&amp;shy;a&amp;shy;tive&amp;shy;ly prime to n. For ex&amp;shy;am&amp;shy;ple, as 1, 2, 4, 5, 7, and 8, are all
+less than nine and rel&amp;shy;a&amp;shy;tive&amp;shy;ly prime to nine, φ(9)=6.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;&lt;th class="head"&gt;n&lt;/th&gt;
+&lt;th class="head"&gt;Rel&amp;shy;a&amp;shy;tive&amp;shy;ly Prime&lt;/th&gt;
+&lt;th class="head"&gt;φ(n)&lt;/th&gt;
+&lt;th class="head"&gt;n/φ(n)&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;3&lt;/td&gt;
+&lt;td&gt;1,2&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;1.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;1,3&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;5&lt;/td&gt;
+&lt;td&gt;1,2,3,4&lt;/td&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;1.25&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;6&lt;/td&gt;
+&lt;td&gt;1,5&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;3&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;7&lt;/td&gt;
+&lt;td&gt;1,2,3,4,5,6&lt;/td&gt;
+&lt;td&gt;6&lt;/td&gt;
+&lt;td&gt;1.1666…&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;8&lt;/td&gt;
+&lt;td&gt;1,3,5,7&lt;/td&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;9&lt;/td&gt;
+&lt;td&gt;1,2,4,5,7,8&lt;/td&gt;
+&lt;td&gt;6&lt;/td&gt;
+&lt;td&gt;1.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;10&lt;/td&gt;
+&lt;td&gt;1,3,7,9&lt;/td&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;2.5&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;It can be seen that n=6 pro&amp;shy;duces a max&amp;shy;i&amp;shy;mum n/φ(n) for n ≤ 10.&lt;/p&gt;
+&lt;p&gt;Find the val&amp;shy;ue of n ≤ 1,000,000 for which n/φ(n) is a max&amp;shy;i&amp;shy;mum.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 69 (PyPy: 75s)&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="n"&gt;maxnum&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1000000&lt;/span&gt;
+
+&lt;span class="n"&gt;totient_table&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;X&amp;#39;&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;maxnum&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+&lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;gcd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+        &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+
+&lt;span class="n"&gt;primes&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;totient&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;primes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+            &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+            &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;%&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+                &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+            &lt;span class="k"&gt;assert&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;gcd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;
+                &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+            &lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="c1"&gt;# Otherwise `a` is a prime&lt;/span&gt;
+    &lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="n"&gt;primes&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;maxnum&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;totient&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt;
+        &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+
+&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;totient_table&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;maxnum&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: Ac&amp;shy;tu&amp;shy;al&amp;shy;ly, this prob&amp;shy;lem can be solved by hand if one sees Eu&amp;shy;ler’s
+own sim&amp;shy;pli&amp;shy;fied for&amp;shy;mu&amp;shy;la for the to&amp;shy;tient func&amp;shy;tion. And I used to think he
+was my favourite. :’(&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="problem-102"&gt;
+&lt;h3&gt;Problem 102&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Three dis&amp;shy;tinct points are plot&amp;shy;ted at ran&amp;shy;dom on a Carte&amp;shy;sian plane,
+for which -1000 ≤ x, y ≤ 1000, such that a tri&amp;shy;an&amp;shy;gle is formed.&lt;/p&gt;
+&lt;p&gt;Con&amp;shy;sid&amp;shy;er the fol&amp;shy;low&amp;shy;ing two tri&amp;shy;an&amp;shy;gles:&lt;/p&gt;
+&lt;p&gt;A(-340,495), B(-153,-910), C(835,-947)&lt;/p&gt;
+&lt;p&gt;X(-175,41), Y(-421,-714), Z(574,-645)&lt;/p&gt;
+&lt;p&gt;It can be ver&amp;shy;i&amp;shy;fied that tri&amp;shy;an&amp;shy;gle ABC con&amp;shy;tains the ori&amp;shy;gin, where&amp;shy;as
+tri&amp;shy;an&amp;shy;gle XYZ does not.&lt;/p&gt;
+&lt;p&gt;Us&amp;shy;ing tri&amp;shy;an&amp;shy;gles.txt (right click and ‘Save Link/Tar&amp;shy;get As…’), a
+27K text file con&amp;shy;tain&amp;shy;ing the co-or&amp;shy;di&amp;shy;nates of one thou&amp;shy;sand “ran&amp;shy;dom”
+tri&amp;shy;an&amp;shy;gles, find the num&amp;shy;ber of tri&amp;shy;an&amp;shy;gles for which the in&amp;shy;te&amp;shy;ri&amp;shy;or
+con&amp;shy;tains the ori&amp;shy;gin.&lt;/p&gt;
+&lt;p&gt;NOTE: The first two ex&amp;shy;am&amp;shy;ples in the file rep&amp;shy;re&amp;shy;sent the tri&amp;shy;an&amp;shy;gles in
+the ex&amp;shy;am&amp;shy;ple giv&amp;shy;en above.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 102 (Python2.7: 0.05s):&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;haszero&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sixpoints&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;ax&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ay&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sixpoints&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;sixpoints&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="n"&gt;bx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;by&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sixpoints&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;sixpoints&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="n"&gt;cx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cy&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;sixpoints&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;sixpoints&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;s2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;s3&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ax&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;by&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;ay&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;bx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;bx&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;cy&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;by&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;cx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cx&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;ay&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;cy&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;ax&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;s1&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;s2&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;s3&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nb"&gt;abs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s2&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nb"&gt;abs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s2&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nb"&gt;abs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s3&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nb"&gt;abs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s3&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;False&lt;/span&gt;
+
+&lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;p102_triangles.txt&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;r&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;line&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;[:&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="n"&gt;sixpoints&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;,&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;sixpoints&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;sixpoints&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;haszero&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sixpoints&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+
+&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: File I/O and string ma&amp;shy;nip&amp;shy;u&amp;shy;la&amp;shy;tion is very easy with Python. The
+usu&amp;shy;al &lt;code&gt;for a in b&lt;/code&gt; syn&amp;shy;tax al&amp;shy;so works for files.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="problem-106"&gt;
+&lt;h3&gt;Problem 106&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Let S(A) rep&amp;shy;re&amp;shy;sent the sum of el&amp;shy;e&amp;shy;ments in set A of size n. We shall
+call it a spe&amp;shy;cial sum set if for any two non-emp&amp;shy;ty dis&amp;shy;joint sub&amp;shy;sets,
+B and C, the fol&amp;shy;low&amp;shy;ing prop&amp;shy;er&amp;shy;ties are true:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;S(B) ≠ S(C); that is, sums of sub&amp;shy;sets can&amp;shy;not be equal.&lt;/li&gt;
+&lt;li&gt;If B con&amp;shy;tains more el&amp;shy;e&amp;shy;ments than C then S(B) &amp;gt; S(C).&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;For this prob&amp;shy;lem we shall as&amp;shy;sume that a giv&amp;shy;en set con&amp;shy;tains n
+strict&amp;shy;ly in&amp;shy;creas&amp;shy;ing el&amp;shy;e&amp;shy;ments and it al&amp;shy;ready sat&amp;shy;is&amp;shy;fies the sec&amp;shy;ond
+rule.&lt;/p&gt;
+&lt;p&gt;Sur&amp;shy;pris&amp;shy;ing&amp;shy;ly, out of the 25 pos&amp;shy;si&amp;shy;ble sub&amp;shy;set pairs that can be
+ob&amp;shy;tained from a set for which n = 4, on&amp;shy;ly 1 of these pairs need to
+be test&amp;shy;ed for equal&amp;shy;i&amp;shy;ty (first rule). Sim&amp;shy;i&amp;shy;lar&amp;shy;ly, when n = 7, on&amp;shy;ly 70
+out of the 966 sub&amp;shy;set pairs need to be test&amp;shy;ed.&lt;/p&gt;
+&lt;p&gt;For n = 12, how many of the 261625 sub&amp;shy;set pairs that can be ob&amp;shy;tained
+need to be test&amp;shy;ed for equal&amp;shy;i&amp;shy;ty?&lt;/p&gt;
+&lt;p&gt;NOTE: This prob&amp;shy;lem is re&amp;shy;lat&amp;shy;ed to Prob&amp;shy;lem 103 and Prob&amp;shy;lem 105.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 106 (Python2.7: 1.2s)&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;scipy.misc&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;comb&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;check_not_reqd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;cn&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;zip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;bn&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;cn&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;recurse&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;depth&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;start&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;end&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;depth&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;start&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;end&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+            &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;check_not_reqd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;)):&lt;/span&gt;
+                &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;depth&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;start&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;end&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;recurse&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;depth&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;depth&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;end&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;
+
+&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;comb&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;12&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;recurse&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)],&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;12&lt;/span&gt;&lt;span class="p"&gt;]]))&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: We need to check the pair (B,C) if and on&amp;shy;ly if we don’t have
+|B|=|C| and we don’t have the in&amp;shy;dices of C in A dom&amp;shy;i&amp;shy;nat&amp;shy;ing the
+in&amp;shy;dices of B in A el&amp;shy;e&amp;shy;ment-wise (or vice-ver&amp;shy;sa). So the so&amp;shy;lu&amp;shy;tion is
+ob&amp;shy;tained by con&amp;shy;struct&amp;shy;ing all the par&amp;shy;ti&amp;shy;tions of in&amp;shy;dices which don’t
+sat&amp;shy;is&amp;shy;fy the two con&amp;shy;di&amp;shy;tions.&lt;/p&gt;
+&lt;p&gt;Here is an ex&amp;shy;pand&amp;shy;ed ver&amp;shy;sion of the &lt;code&gt;recurse&lt;/code&gt; func&amp;shy;tion for &lt;code&gt;t=8&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="n"&gt;tot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;
+&lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;start&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;end&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;tot&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;start&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;end&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;end&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;end&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;end&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+                &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;tot&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+                &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;check_not_reqd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;)):&lt;/span&gt;
+                    &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Au&amp;shy;thor’s note: Con&amp;shy;sid&amp;shy;er the “if and on&amp;shy;ly if” state&amp;shy;ment posed by Al&amp;shy;ice as
+P⇔Q. Al&amp;shy;though the case ¬Q⇒¬P is ob&amp;shy;vi&amp;shy;ous, the oth&amp;shy;er way around isn’t (at
+least to me). So I post&amp;shy;ed the fol&amp;shy;low&amp;shy;ing ques&amp;shy;tion on Math Stack&amp;shy;Ex&amp;shy;change:
+&lt;a href="https://math.stackexchange.com/questions/1723048/project-euler-106-necessary-and-sufficient-conditions"&gt;Project Eu&amp;shy;ler 106: Nec&amp;shy;es&amp;shy;sary and Suf&amp;shy;fi&amp;shy;cient
+Con&amp;shy;di&amp;shy;tions&lt;/a&gt;.&lt;/p&gt;
+&lt;/section&gt;
+&lt;/section&gt;
+&lt;section id="rust"&gt;
+&lt;h2&gt;Rust&lt;/h2&gt;
+&lt;section id="problem-23"&gt;
+&lt;h3&gt;Problem 23&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A per&amp;shy;fect num&amp;shy;ber is a num&amp;shy;ber for which the sum of its prop&amp;shy;er
+di&amp;shy;vi&amp;shy;sors is ex&amp;shy;act&amp;shy;ly equal to the num&amp;shy;ber. For ex&amp;shy;am&amp;shy;ple, the sum of the
+prop&amp;shy;er di&amp;shy;vi&amp;shy;sors of 28 would be 1 + 2 + 4 + 7 + 14 = 28, which means
+that 28 is a per&amp;shy;fect num&amp;shy;ber.&lt;/p&gt;
+&lt;p&gt;A num&amp;shy;ber n is called de&amp;shy;fi&amp;shy;cient if the sum of its prop&amp;shy;er di&amp;shy;vi&amp;shy;sors is
+less than n and it is called abun&amp;shy;dant if this sum ex&amp;shy;ceeds n.&lt;/p&gt;
+&lt;p&gt;As 12 is the small&amp;shy;est abun&amp;shy;dant num&amp;shy;ber, 1 + 2 + 3 + 4 + 6 = 16, the
+small&amp;shy;est num&amp;shy;ber that can be writ&amp;shy;ten as the sum of two abun&amp;shy;dant
+num&amp;shy;bers is 24. By math&amp;shy;e&amp;shy;mat&amp;shy;i&amp;shy;cal anal&amp;shy;y&amp;shy;sis, it can be shown that all
+in&amp;shy;te&amp;shy;gers greater than 28123 can be writ&amp;shy;ten as the sum of two
+abun&amp;shy;dant num&amp;shy;bers. How&amp;shy;ev&amp;shy;er, this up&amp;shy;per lim&amp;shy;it can&amp;shy;not be re&amp;shy;duced any
+fur&amp;shy;ther by anal&amp;shy;y&amp;shy;sis even though it is known that the great&amp;shy;est num&amp;shy;ber
+that can&amp;shy;not be ex&amp;shy;pressed as the sum of two abun&amp;shy;dant num&amp;shy;bers is less
+than this lim&amp;shy;it.&lt;/p&gt;
+&lt;p&gt;Find the sum of all the pos&amp;shy;i&amp;shy;tive in&amp;shy;te&amp;shy;gers which can&amp;shy;not be writ&amp;shy;ten as
+the sum of two abun&amp;shy;dant num&amp;shy;bers.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 23 (0.25s):&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;: &lt;span class="kt"&gt;usize&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;28123&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;abundant&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;abundant&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="c1"&gt;//let mut x = Vec::new();&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;expressible_as_sum_of_two_abundant_nos&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;abundant&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;abundant&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="n"&gt;expressible_as_sum_of_two_abundant_nos&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;expressible_as_sum_of_two_abundant_nos&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="c1"&gt;//x.push(i);&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;expressible_as_sum_of_two_abundant_nos&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="cm"&gt;/*println!(&amp;quot;{:?}&amp;quot;, abundant.iter().enumerate()&lt;/span&gt;
+&lt;span class="cm"&gt;        .filter(|&amp;amp;(i, &amp;amp;a)| a).map(|(i,&amp;amp;a)| i)&lt;/span&gt;
+&lt;span class="cm"&gt;        .collect::&amp;lt;Vec&amp;lt;_&amp;gt;&amp;gt;());&lt;/span&gt;
+&lt;span class="cm"&gt;    println!(&amp;quot;{:?}&amp;quot;, x);*/&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;{:?}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: The &lt;code&gt;mut&lt;/code&gt; marks mu&amp;shy;ta&amp;shy;ble vari&amp;shy;ables. &lt;code&gt;vec!&lt;/code&gt; cre&amp;shy;ates vec&amp;shy;tors
+(grow&amp;shy;able but ar&amp;shy;ray-like). The &lt;code&gt;..&lt;/code&gt; syn&amp;shy;tax ex&amp;shy;press&amp;shy;es ranges (low&amp;shy;er
+bound in&amp;shy;clu&amp;shy;sive, up&amp;shy;per bound ex&amp;shy;clu&amp;shy;sive). I have left some com&amp;shy;ments while
+de&amp;shy;bug&amp;shy;ging for &lt;code&gt;x&lt;/code&gt;.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="problem-40"&gt;
+&lt;h3&gt;Problem 40&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;An ir&amp;shy;ra&amp;shy;tional dec&amp;shy;i&amp;shy;mal frac&amp;shy;tion is cre&amp;shy;at&amp;shy;ed by con&amp;shy;cate&amp;shy;nat&amp;shy;ing the
+pos&amp;shy;i&amp;shy;tive in&amp;shy;te&amp;shy;gers:&lt;/p&gt;
+&lt;p&gt;0.123456789101112131415161718192021…&lt;/p&gt;
+&lt;p&gt;It can be seen that the 12th dig&amp;shy;it of the frac&amp;shy;tion&amp;shy;al part is 1.&lt;/p&gt;
+&lt;p&gt;If dn rep&amp;shy;re&amp;shy;sents the nth dig&amp;shy;it of the frac&amp;shy;tion&amp;shy;al part, find the
+val&amp;shy;ue of the fol&amp;shy;low&amp;shy;ing ex&amp;shy;pres&amp;shy;sion.&lt;/p&gt;
+&lt;p&gt;d1 x d10 x d100 x d1000 x d10000 x d100000 x d1000000&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 40 (0.26s):&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;max&lt;/span&gt;: &lt;span class="kt"&gt;usize&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1_000_000&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// 1 million&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;: &lt;span class="nb"&gt;Vec&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="kt"&gt;i64&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ind&lt;/span&gt;: &lt;span class="kt"&gt;usize&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="n"&gt;rev&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;as&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;i64&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;as&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;i64&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="n"&gt;pow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;ind&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;as&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;i64&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;as&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;i64&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="n"&gt;pow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="n"&gt;ind&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ind&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ind&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;ind&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;{:?} {:?} {:?} {:?} {:?} {:?} {:?}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1000&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;10000&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;100000&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1000000&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: &lt;code&gt;usize&lt;/code&gt;, &lt;code&gt;i64&lt;/code&gt; are types. &lt;code&gt;_&lt;/code&gt; can be used as a sep&amp;shy;a&amp;shy;ra&amp;shy;tor
+for clar&amp;shy;i&amp;shy;ty. &lt;code&gt;rev&lt;/code&gt; re&amp;shy;vers&amp;shy;es an it&amp;shy;er&amp;shy;a&amp;shy;tor. &lt;code&gt;pow&lt;/code&gt; com&amp;shy;putes in&amp;shy;te&amp;shy;ger
+pow&amp;shy;ers. All the dig&amp;shy;its are print&amp;shy;ed sep&amp;shy;a&amp;shy;rate&amp;shy;ly.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="problem-549"&gt;
+&lt;h3&gt;Problem 549&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The small&amp;shy;est num&amp;shy;ber m such that 10 di&amp;shy;vides m! is m=5. The small&amp;shy;est
+num&amp;shy;ber m such that 25 di&amp;shy;vides m! is m=10.&lt;/p&gt;
+&lt;p&gt;Let s(n) be the small&amp;shy;est num&amp;shy;ber m such that n di&amp;shy;vides m!.&lt;/p&gt;
+&lt;p&gt;So s(10)=5 and s(25)=10.&lt;/p&gt;
+&lt;p&gt;Let S(n) be ∑s(i) for 2 ≤ i ≤ n.&lt;/p&gt;
+&lt;p&gt;S(100)=2012.&lt;/p&gt;
+&lt;p&gt;Find S(108).&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So&amp;shy;lu&amp;shy;tion to prob&amp;shy;lem 549 (39s):&lt;/p&gt;
+&lt;pre class="m-code"&gt;&lt;span class="cp"&gt;#![feature(iter_arith)]&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="c1"&gt;// Checks if p_j divides factorial(base)/div&lt;/span&gt;
+&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;rem0&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;base&lt;/span&gt;: &lt;span class="kt"&gt;usize&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;div&lt;/span&gt;: &lt;span class="kt"&gt;usize&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;p_j&lt;/span&gt;: &lt;span class="kt"&gt;usize&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-&amp;gt; &lt;span class="kt"&gt;bool&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;div&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;p_j&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;p_j&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;count2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;base&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;p_j&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;count2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;count2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;p_j&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;count2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;p_j&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;count2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;: &lt;span class="kt"&gt;usize&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;100_000_000&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;: &lt;span class="nb"&gt;Vec&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nb"&gt;Vec&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="kt"&gt;usize&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="c1"&gt;// lowest prime divisor and value of s(i)&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mut&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;// number must be prime&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LIM&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;rem0&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;val&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;let&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;: &lt;span class="kt"&gt;usize&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;stuff&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;iter&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]).&lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;println&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;{:?}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;&lt;/pre&gt;
+&lt;p&gt;Notes: Al&amp;shy;though fair&amp;shy;ly sim&amp;shy;ple, this is prob&amp;shy;a&amp;shy;bly the big&amp;shy;gest so&amp;shy;lu&amp;shy;tion
+I’ve writ&amp;shy;ten.&lt;/p&gt;
+&lt;/section&gt;
+&lt;/section&gt;
+&lt;section id="epilogue"&gt;
+&lt;h2&gt;Epilogue&lt;/h2&gt;
+&lt;p&gt;Some time af&amp;shy;ter solv&amp;shy;ing the ten prob&amp;shy;lems men&amp;shy;tioned above, Al&amp;shy;ice wrote
+the fol&amp;shy;low&amp;shy;ing let&amp;shy;ter to Bob:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Bob,&lt;/p&gt;
+&lt;p&gt;You were right about all the pro&amp;shy;gram&amp;shy;ming lan&amp;shy;guages be&amp;shy;ing fun in
+their own way.&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Haskell: This one is prob&amp;shy;a&amp;shy;bly my favourite as the no&amp;shy;ta&amp;shy;tion is
+very sim&amp;shy;i&amp;shy;lar to math and it ex&amp;shy;press&amp;shy;es in&amp;shy;tent very clear&amp;shy;ly,
+es&amp;shy;pe&amp;shy;cial&amp;shy;ly since you don’t have mu&amp;shy;ta&amp;shy;tion. Once I fig&amp;shy;ured out the
+struc&amp;shy;ture of the pro&amp;shy;gram, writ&amp;shy;ing Haskell code was very easy.
+How&amp;shy;ev&amp;shy;er, I did have some trou&amp;shy;ble writ&amp;shy;ing the pseu&amp;shy;docode it&amp;shy;self
+(ex&amp;shy;am&amp;shy;ple: the Fi&amp;shy;bonac&amp;shy;ci list con&amp;shy;struc&amp;shy;tion).&lt;/li&gt;
+&lt;li&gt;Python: The code reads very much like pseu&amp;shy;docode, which is
+per&amp;shy;haps its big&amp;shy;gest strength. Def&amp;shy;i&amp;shy;nite&amp;shy;ly the eas&amp;shy;i&amp;shy;est to use for
+string ma&amp;shy;nip&amp;shy;u&amp;shy;la&amp;shy;tion and sim&amp;shy;plic&amp;shy;i&amp;shy;ty over&amp;shy;all.&lt;/li&gt;
+&lt;li&gt;Rust: For my pur&amp;shy;pos&amp;shy;es, Rust seems a bit too ver&amp;shy;bose. De&amp;shy;spite
+that, the code is easy to read. Al&amp;shy;so all the code that I wrote
+ran very fast with&amp;shy;out much has&amp;shy;sle.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Bye,&lt;/p&gt;
+&lt;p&gt;A&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Bob was pleas&amp;shy;ant&amp;shy;ly sur&amp;shy;prised. While he had hoped that Al&amp;shy;ice would try
+all the three, he cer&amp;shy;tain&amp;shy;ly hadn’t ex&amp;shy;pect&amp;shy;ed that she would do so. Here’s
+what he wrote back:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hi Al&amp;shy;ice,&lt;/p&gt;
+&lt;p&gt;I’m hap&amp;shy;py that you en&amp;shy;joyed your so&amp;shy;journ in the land of pro&amp;shy;gram&amp;shy;ming
+lan&amp;shy;guages. There are a great many more lan&amp;shy;guages out there, from the
+weird and es&amp;shy;o&amp;shy;ter&amp;shy;ic to the te&amp;shy;dious and mun&amp;shy;dane.&lt;/p&gt;
+&lt;p&gt;Even for the three lan&amp;shy;guages you’ve tried, I think you’ve just
+touched the prover&amp;shy;bial tip of the ice&amp;shy;berg here, es&amp;shy;pe&amp;shy;cial&amp;shy;ly since you
+were pri&amp;shy;mar&amp;shy;i&amp;shy;ly con&amp;shy;cerned with solv&amp;shy;ing math prob&amp;shy;lems. For a work&amp;shy;ing
+pro&amp;shy;gram&amp;shy;mer, there are many more use&amp;shy;ful fea&amp;shy;tures that these lan&amp;shy;guages
+pro&amp;shy;vide than those you’ve just seen:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Haskell:
+&lt;a href="https://en.wikipedia.org/wiki/Purely_functional"&gt;Pu&amp;shy;ri&amp;shy;ty&lt;/a&gt;
+makes de&amp;shy;bug&amp;shy;ging much eas&amp;shy;i&amp;shy;er. Best of all, there is
+&lt;a href="https://www.haskell.org/hoogle/?hoogle="&gt;Hoogle&lt;/a&gt; is su&amp;shy;per
+help&amp;shy;ful where you can search for func&amp;shy;tions; for ex&amp;shy;am&amp;shy;ple, you can
+do a re&amp;shy;verse look-up for func&amp;shy;tion names us&amp;shy;ing on&amp;shy;ly the type
+sig&amp;shy;na&amp;shy;ture.&lt;/li&gt;
+&lt;li&gt;Python: You have sev&amp;shy;er&amp;shy;al use&amp;shy;ful li&amp;shy;braries to do a va&amp;shy;ri&amp;shy;ety of
+tasks. For ex&amp;shy;am&amp;shy;ple, you can use
+&lt;code&gt;`matplotlib&lt;/code&gt; &amp;lt;&lt;a href="http://matplotlib.org/"&gt;http://mat&amp;shy;plotlib.org/&lt;/a&gt;&amp;gt;`__ to make plots,
+&lt;code&gt;`sympy&lt;/code&gt; &amp;lt;&lt;a href="http://www.sympy.org/en/index.html"&gt;http://www.sympy.org/en/in&amp;shy;dex.html&lt;/a&gt;&amp;gt;`__ to do sym&amp;shy;bol&amp;shy;ic
+cal&amp;shy;cu&amp;shy;la&amp;shy;tions and &lt;code&gt;`numpy&lt;/code&gt; &amp;lt;&lt;a href="http://www.numpy.org/"&gt;http://www.numpy.org/&lt;/a&gt;&amp;gt;`__ for
+nu&amp;shy;mer&amp;shy;ics. Al&amp;shy;so, there are a very large num&amp;shy;ber of python ques&amp;shy;tions
+on Stack&amp;shy;Over&amp;shy;flow asked by be&amp;shy;gin&amp;shy;ners.&lt;/li&gt;
+&lt;li&gt;Rust: You’ve got sup&amp;shy;port for au&amp;shy;to&amp;shy;mat&amp;shy;ic doc&amp;shy;u&amp;shy;men&amp;shy;ta&amp;shy;tion with &lt;code&gt;///&lt;/code&gt;
+and runnable ex&amp;shy;am&amp;shy;ples in com&amp;shy;ments as well. The de&amp;shy;fault
+in&amp;shy;stal&amp;shy;la&amp;shy;tion al&amp;shy;so comes with a pack&amp;shy;age man&amp;shy;ag&amp;shy;er
+&lt;a href="http://doc.crates.io/"&gt;Car&amp;shy;go&lt;/a&gt; which makes in&amp;shy;stalling
+de&amp;shy;pen&amp;shy;den&amp;shy;cies a breeze. Safe Rust al&amp;shy;so pre&amp;shy;vents da&amp;shy;ta races. The
+best part about the lan&amp;shy;guage is the com&amp;shy;mu&amp;shy;ni&amp;shy;ty which is very
+friend&amp;shy;ly to be&amp;shy;gin&amp;shy;ners. Check them out on
+&lt;a href="https://www.reddit.com/r/rust"&gt;/r/rust&lt;/a&gt; and
+&lt;a href="https://chat.mibbit.com/?server=irc.mozilla.org%3A%2B6697&amp;amp;channel=%23rust"&gt;#rust&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Best,&lt;/p&gt;
+&lt;p&gt;Bob&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;As Al&amp;shy;ice stepped off her com&amp;shy;put&amp;shy;er af&amp;shy;ter read&amp;shy;ing Bob’s email, she
+re&amp;shy;alised that she hadn’t even start&amp;shy;ed work&amp;shy;ing on the project.&lt;/p&gt;
+&lt;hr class="docutils" /&gt;
+&lt;p&gt;P.S. At the time of writ&amp;shy;ing, the Rust syn&amp;shy;tax high&amp;shy;light&amp;shy;ing is not
+per&amp;shy;fect. This is an is&amp;shy;sue with the syn&amp;shy;tax high&amp;shy;lighter that Github Pages
+us&amp;shy;es: Rouge. See the
+&lt;a href="https://github.com/jneen/rouge/issues/287"&gt;is&amp;shy;sue&lt;/a&gt; and a par&amp;shy;tial fix
+&lt;a href="https://github.com/jneen/rouge/pull/452"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;/section&gt;
+</content><category term="haskell"></category><category term="rust"></category><category term="python"></category><category term="project euler"></category></entry></feed>

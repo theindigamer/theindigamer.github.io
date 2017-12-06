@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Nocturne in Code and Prose - misc</title><link href="https://theindigamer.github.io/" rel="alternate"></link><link href="https://theindigamer.github.io/feeds/misc.atom.xml" rel="self"></link><id>https://theindigamer.github.io/</id><updated>2016-04-02T00:00:00-05:00</updated><entry><title>Migration from Wordpress</title><link href="https://theindigamer.github.io/migration-from-wordpress.html" rel="alternate"></link><published>2016-04-02T00:00:00-05:00</published><updated>2016-04-02T00:00:00-05:00</updated><author><name>Varun Gandhi</name></author><id>tag:theindigamer.github.io,2016-04-02:/migration-from-wordpress.html</id><summary type="html"></summary><content type="html">&lt;p&gt;&lt;strong&gt;Why have I mi&amp;shy;grat&amp;shy;ed?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;There are many rea&amp;shy;sons. In no par&amp;shy;tic&amp;shy;u&amp;shy;lar or&amp;shy;der,&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;I’ve re&amp;shy;cent&amp;shy;ly no&amp;shy;ticed that I have very lit&amp;shy;tle tol&amp;shy;er&amp;shy;ance for slow&amp;shy;ly
+load&amp;shy;ing web&amp;shy;pages. Us&amp;shy;ing a stat&amp;shy;i&amp;shy;cal&amp;shy;ly gen&amp;shy;er&amp;shy;at&amp;shy;ed site with ze&amp;shy;ro
+Javascript means that my blog will load fast.&lt;/li&gt;
+&lt;li&gt;With Word&amp;shy;press, I had to choose be&amp;shy;tween sim&amp;shy;pler, faster draft&amp;shy;ing
+(us&amp;shy;ing my favourite text ed&amp;shy;i&amp;shy;tor) and for&amp;shy;mat&amp;shy;ting (avail&amp;shy;able in the
+Word&amp;shy;press ed&amp;shy;i&amp;shy;tor; I wasn’t go&amp;shy;ing to write HTML code). With Github
+pages and mark&amp;shy;down, I can have the best of both worlds.&lt;/li&gt;
+&lt;li&gt;I can use &lt;code&gt;git&lt;/code&gt;. At this point, I’m just look&amp;shy;ing for ex&amp;shy;cus&amp;shy;es to use
+&lt;code&gt;git&lt;/code&gt; so that I can learn more :P.&lt;/li&gt;
+&lt;li&gt;As of to&amp;shy;day, I haven’t pub&amp;shy;lished any&amp;shy;thing on the old blog for about
+10 months. I’d rather start anew.&lt;/li&gt;
+&lt;li&gt;The old blog was pri&amp;shy;mar&amp;shy;i&amp;shy;ly fo&amp;shy;cused on video games and a bit of tech
+(at an ear&amp;shy;li&amp;shy;er stage). Now, I’d al&amp;shy;so like to put in a few ar&amp;shy;ti&amp;shy;cles
+about physics, pro&amp;shy;gram&amp;shy;ming, grad school etc.&lt;/li&gt;
+&lt;li&gt;Github Pages has ze&amp;shy;ro ads by de&amp;shy;fault.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Why aren’t the posts from the old Word&amp;shy;press blog avail&amp;shy;able here?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;While I’m hap&amp;shy;py with the re&amp;shy;views, many of the ar&amp;shy;ti&amp;shy;cles are just dull or
+cringe-wor&amp;shy;thy in hind&amp;shy;sight. I was ini&amp;shy;tial&amp;shy;ly go&amp;shy;ing to have them here but
+fi&amp;shy;nal&amp;shy;ly de&amp;shy;cid&amp;shy;ed against it.&lt;/p&gt;
+</content></entry></feed>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" href="/favicon.gif">
+<head>
+  <meta charset="UTF-8" />
+  <title>Making numbers quickly in Piet | Nocturne in Code and Prose</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,400i,600%7CSource+Sans+Pro:400,400i,600,600i&amp;subset=latin-ext" />
+  <link rel="stylesheet" href="https://theindigamer.github.io/static/m-dark.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="keywords" content="piet, math, ocaml" />
+  <meta property="og:title" content="Making numbers quickly in Piet" />
+  <meta name="twitter:title" content="Making numbers quickly in Piet" />
+  <meta property="og:url" content="https://theindigamer.github.io/making-numbers-quickly-in-piet.html" />
+  <meta name="twitter:url" content="https://theindigamer.github.io/making-numbers-quickly-in-piet.html" />
+  <meta property="og:description" content="Piet is a stack based es­o­ter­ic pro­gram­ming lan­guage with a rel­a­tive­ly sim­ple set of in­struc­tions. At­tempt­ing to make ar­bi­trar­i­ly large num­bers us­ing as few op­er­a­tions as pos­si­ble is an in­ter­est­ing prob­lem in this con­text. We can use dy­nam­ic pro­gram­ming – in the form of depth-first search + mem­o­iza­tion – to ob­tain these op­ti­mal in­struc­tion se­quences." />
+  <meta name="twitter:description" content="Piet is a stack based es­o­ter­ic pro­gram­ming lan­guage with a rel­a­tive­ly sim­ple set of in­struc­tions. At­tempt­ing to make ar­bi­trar­i­ly large num­bers us­ing as few op­er­a­tions as pos­si­ble is an in­ter­est­ing prob­lem in this con­text. We can use dy­nam­ic pro­gram­ming – in the form of depth-first search + mem­o­iza­tion – to ob­tain these op­ti­mal in­struc­tion se­quences." />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:type" content="article" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="https://theindigamer.github.io/" id="m-navbar-brand" class="m-col-t-9 m-col-m-none m-left-m">Nocturne in Code and Prose</a>
+      <a id="m-navbar-show" href="#navigation" title="Show navigation" class="m-col-t-3 m-hide-m m-text-right"></a>
+      <a id="m-navbar-hide" href="#" title="Hide navigation" class="m-col-t-3 m-hide-m m-text-right"></a>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="https://theindigamer.github.io/pages/about.html">About?</a>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="2">
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main>
+<div class="m-container">
+  <div class="m-row">
+    <article class="m-col-m-10 m-nopadb">
+      <header>
+        <h1><a href="https://theindigamer.github.io/making-numbers-quickly-in-piet.html" rel="bookmark" title="Permalink to Making numbers quickly in Piet">
+          <time class="m-date" datetime="2017-07-15T00:00:00-05:00">
+            Jul <span class="m-date-day">15</span> 2017
+          </time>
+          Making numbers quickly in Piet
+        </a></h1>
+        <p>Piet is a stack based es&shy;o&shy;ter&shy;ic pro&shy;gram&shy;ming lan&shy;guage with a rel&shy;a&shy;tive&shy;ly
+        sim&shy;ple set of in&shy;struc&shy;tions. At&shy;tempt&shy;ing to make ar&shy;bi&shy;trar&shy;i&shy;ly large num&shy;bers us&shy;ing
+        as few op&shy;er&shy;a&shy;tions as pos&shy;si&shy;ble is an in&shy;ter&shy;est&shy;ing prob&shy;lem in this con&shy;text.
+        We can use dy&shy;nam&shy;ic pro&shy;gram&shy;ming – in the form of depth-first search +
+        mem&shy;o&shy;iza&shy;tion – to ob&shy;tain these op&shy;ti&shy;mal in&shy;struc&shy;tion se&shy;quences.</p>
+
+      </header>
+      <div class="m-clearfix-l"></div>
+<!-- content -->
+<p>(Note: This ar&shy;ti&shy;cle is based on my ex&shy;pe&shy;ri&shy;ence ask&shy;ing a
+<a href="https://math.stackexchange.com/questions/2355111/making-numbers-cheaply">ques&shy;tion</a>
+on the Math Stack&shy;Ex&shy;change and com&shy;ing up with a so&shy;lu&shy;tion based off one
+giv&shy;en in an an&shy;swer. If you on&shy;ly care about the math, just read the
+orig&shy;i&shy;nal ques&shy;tion’s text and skip the first two sec&shy;tions.)</p>
+<p>1, 2, 3, 4, 5, 8, 7, 11, 13, 22, 41, 44, 94, 176, 177, 472, 697, 1067,
+1391, 3557, 8493, …</p>
+<section id="background">
+<h2>Background</h2>
+<p><a href="http://www.dangermouse.net/esoteric/piet.html">Piet</a> is an es&shy;o&shy;ter&shy;ic
+pro&shy;gram&shy;ming lan&shy;guage where pro&shy;grams take the form of draw&shy;ings (bit&shy;map
+im&shy;ages, to be more pre&shy;cise). In&shy;stead of de&shy;scrib&shy;ing how Piet works, let
+me just de&shy;scribe the rel&shy;e&shy;vant sub&shy;set that we are in&shy;ter&shy;est&shy;ed in.</p>
+<p>The pro&shy;gram is bro&shy;ken up in&shy;to “codels”. A codel is ba&shy;si&shy;cal&shy;ly a square
+ar&shy;range&shy;ment of pix&shy;els (iden&shy;ti&shy;cal&shy;ly coloured) that rep&shy;re&shy;sents one code
+unit for Piet. A codel may take one of 20 colours – white, black and
+light, medi&shy;um and dark vari&shy;ants of red, green, blue, cyan, ma&shy;gen&shy;ta and
+yel&shy;low.</p>
+<p>At any giv&shy;en point, the pro&shy;gram is in some codel. A Piet in&shy;ter&shy;preter
+would main&shy;tain a stack (con&shy;tain&shy;ing num&shy;bers) for com&shy;pu&shy;ta&shy;tions. The nor&shy;mal
+push and pop op&shy;er&shy;a&shy;tions are sup&shy;port&shy;ed for the stack. Call&shy;ing an add
+op&shy;er&shy;a&shy;tion would mean pop&shy;ping off the top two val&shy;ues on the stack, adding
+them and push&shy;ing the re&shy;sult back on&shy;to the stack. In post&shy;fix no&shy;ta&shy;tion,
+this is rep&shy;re&shy;sent&shy;ed like [5,6,3,4,+] → [5,6,7] where the top of the
+stack is on the right.</p>
+<p>Colour blocks are con&shy;tigu&shy;ous (in 2D) se&shy;quences of codels. So colour
+blocks may have size 1 (in codels) or more.</p>
+<p>Colour tran&shy;si&shy;tions dic&shy;tate what op&shy;er&shy;a&shy;tion ought to be done. For ex&shy;am&shy;ple,
+the tran&shy;si&shy;tion light red → (medi&shy;um) red means that the size of the
+pre&shy;vi&shy;ous (light red) colour block is pushed on&shy;to the stack. For ex&shy;am&shy;ple,
+the fol&shy;low&shy;ing pseu&shy;docode just push&shy;es 3 on&shy;to the stack and ex&shy;its:</p>
+<pre>lightred lightred lightred red.</pre>
+<p>(For sim&shy;plic&shy;i&shy;ty, we look on&shy;ly at lin&shy;ear pro&shy;grams – pro&shy;gram flow is from
+left to right.)</p>
+<p>The math op&shy;er&shy;a&shy;tions sup&shy;port by Piet in&shy;clude {~,+,-,*,/,%,&#64;} where ~ is
+a not op&shy;er&shy;a&shy;tion (0 maps to 1 and the rest map to ze&shy;ro), {+,-,*,/} are
+or&shy;di&shy;nary ad&shy;di&shy;tion, sub&shy;trac&shy;tion, mul&shy;ti&shy;pli&shy;ca&shy;tion and in&shy;te&shy;ger di&shy;vi&shy;sion
+(floored), % is the mod&shy;u&shy;lo op&shy;er&shy;a&shy;tion and &#64; is a unary du&shy;pli&shy;ca&shy;tion
+op&shy;er&shy;a&shy;tion. For ex&shy;am&shy;ple, [13,5,%] → [3] and [3,&#64;,*] → [3,3,*] → [9].</p>
+<p>(If you are still con&shy;fused about what the heck is go&shy;ing on, then this
+<a href="http://homepages.vub.ac.be/~diddesen/piet/index.html">Piet tu&shy;to&shy;ri&shy;al</a>
+might be help&shy;ful. On&shy;ly the sec&shy;tions be&shy;fore “Con&shy;trol&shy;ling the flow” are
+rel&shy;e&shy;vant for un&shy;der&shy;stand&shy;ing the cur&shy;rent ar&shy;ti&shy;cle. You may al&shy;so find
+Wikipedia’s page on <a href="https://en.wikipedia.org/wiki/Reverse_polish_notation">re&shy;verse pol&shy;ish
+no&shy;ta&shy;tion</a>
+help&shy;ful.)</p>
+</section>
+<section id="math-problem">
+<h2>Math problem</h2>
+<p>(This sec&shy;tion is a su&shy;per con&shy;densed ver&shy;sion of the
+<a href="https://math.stackexchange.com/questions/2355111/making-numbers-cheaply">ques&shy;tion</a>
+post&shy;ed on Stack&shy;Ex&shy;change.)</p>
+<p>In the ear&shy;li&shy;er ex&shy;am&shy;ple it is clear that push&shy;ing 3 on&shy;to the stack “costs”
+3 tran&shy;si&shy;tions (marked with <code>|</code>).</p>
+<pre>lightred | lightred | lightred | red.</pre>
+<p>From the Piet spec&shy;i&shy;fi&shy;ca&shy;tion, it is easy to de&shy;duce that the min&shy;i&shy;mum cost
+of push&shy;ing a num&shy;ber <em>n</em> di&shy;rect&shy;ly on&shy;to the stack is ex&shy;act&shy;ly <em>n</em>
+tran&shy;si&shy;tions. One can al&shy;so de&shy;duce that ap&shy;ply&shy;ing any math op&shy;er&shy;a&shy;tion costs
+1 tran&shy;si&shy;tion.</p>
+<p>What about in&shy;di&shy;rect&shy;ly push&shy;ing num&shy;bers? For ex&shy;am&shy;ple (with im&shy;plic&shy;it
+push&shy;es), [3,&#64;,&#64;,+,+] ends up (ef&shy;fec&shy;tive&shy;ly) push&shy;ing the num&shy;ber 9 on&shy;to the
+stack with cost 7. How&shy;ev&shy;er [3,&#64;,*] al&shy;so ends up (ef&shy;fec&shy;tive&shy;ly) do&shy;ing the
+same thing but with cost 5.</p>
+<p>So a nat&shy;u&shy;ral ques&shy;tion to ask is: giv&shy;en a num&shy;ber <em>n</em> which we’d like to
+push on&shy;to the stack, what is the cheap&shy;est se&shy;quence of op&shy;er&shy;a&shy;tions that
+(ef&shy;fec&shy;tive&shy;ly) does the same thing?</p>
+</section>
+<section id="stupid-algorithm">
+<h2>Stupid algorithm</h2>
+<p>Imag&shy;ine an in&shy;fi&shy;nite <a href="https://en.wikipedia.org/wiki/Trie">pre&shy;fix tree</a>
+which con&shy;tains all pos&shy;si&shy;ble le&shy;gal paths. For ex&shy;am&shy;ple, [3,3,-] is a le&shy;gal
+path where&shy;as [3,+] isn’t (there aren’t two num&shy;bers to add). Since
+[3,3,-] is a le&shy;gal path, the tree’s root (emp&shy;ty) has a child node <code>3</code>
+which has a child node <code>3</code> which has a child node <code>-</code> which has
+child nodes <code>{&#64;, 1, 2, 3, ...}</code> (no bi&shy;na&shy;ry op&shy;er&shy;a&shy;tions are chil&shy;dren of
+<code>-</code> be&shy;cause that would make an il&shy;le&shy;gal path).</p>
+<p>Let us al&shy;so put the cor&shy;re&shy;spond&shy;ing (ef&shy;fec&shy;tive) se&shy;quence at the nodes,
+i.e., path [3,&#64;,2,-] will have the se&shy;quences as {[3], [3,3], [3,3,2],
+[3,1]}. The [3,3,2] will be stored at the node with <code>2</code> and so on.
+While travers&shy;ing this tree, if we see that that the se&shy;quence at our
+cur&shy;rent node is of length 1, say [<em>m</em>], then the an&shy;ces&shy;tors of the
+cur&shy;rent node (in&shy;clud&shy;ing it&shy;self) de&shy;scribe a can&shy;di&shy;date cheap&shy;est path for
+cre&shy;at&shy;ing <em>m</em>.</p>
+<p>For sim&shy;plic&shy;i&shy;ty, we al&shy;so main&shy;tain the cu&shy;mu&shy;la&shy;tive cost of an&shy;ces&shy;tors
+(in&shy;clud&shy;ing it&shy;self) at the nodes.</p>
+<p>We do a depth first search of this tree up to some fixed depth (i.e. an
+ar&shy;bi&shy;trar&shy;i&shy;ly cho&shy;sen max&shy;i&shy;mum cost). While search&shy;ing, we main&shy;tain a look up
+ta&shy;ble map&shy;ping se&shy;quences to min&shy;i&shy;mum cost, up&shy;dat&shy;ing as nec&shy;es&shy;sary. If we
+ar&shy;rive at a node where the the se&shy;quence has a saved map&shy;ping, we com&shy;pare
+the costs – if the new cost is equal to or high&shy;er than the saved cost
+then we stop go&shy;ing deep&shy;er in&shy;to the tree. Sim&shy;i&shy;lar&shy;ly, if the cur&shy;rent
+se&shy;quence is too long to shrink to length 1 (us&shy;ing op&shy;er&shy;a&shy;tions) in the
+‘bud&shy;get’ (max cost mi&shy;nus cur&shy;rent cost), then we stop go&shy;ing deep&shy;er.</p>
+<p>(Yes, I know this al&shy;go&shy;rithm is ex&shy;po&shy;nen&shy;tial; if you have a bet&shy;ter
+so&shy;lu&shy;tion then please get in touch :).)</p>
+<p>Here is a Ocaml im&shy;ple&shy;men&shy;ta&shy;tion of the al&shy;go&shy;rithm de&shy;scribed above:</p>
+<pre class="m-code"><span class="k">open</span> <span class="nc">Batteries</span>
+
+<span class="k">module</span> <span class="nc">MakeCheap</span> <span class="o">=</span> <span class="k">struct</span>
+  <span class="k">module</span> <span class="nc">H</span> <span class="o">=</span> <span class="nc">BatHashtbl</span>
+  <span class="k">module</span> <span class="nc">V</span> <span class="o">=</span> <span class="nc">BatVect</span>
+
+  <span class="k">type</span> <span class="n">seq</span> <span class="o">=</span> <span class="kt">int</span> <span class="kt">list</span>
+  <span class="k">let</span> <span class="n">int_max</span> <span class="o">=</span> <span class="nn">BatInt</span><span class="p">.</span><span class="n">max_num</span>
+  <span class="k">type</span> <span class="n">binary_op</span> <span class="o">=</span> <span class="nc">PAdd</span> <span class="o">|</span> <span class="nc">PSub</span> <span class="o">|</span> <span class="nc">PMul</span> <span class="o">|</span> <span class="nc">PDiv</span> <span class="o">|</span> <span class="nc">PMod</span>
+  <span class="k">type</span> <span class="n">elem</span> <span class="o">=</span> <span class="nc">Number</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">|</span> <span class="nc">PDup</span> <span class="o">|</span> <span class="nc">Binary</span> <span class="k">of</span> <span class="n">binary_op</span>
+  <span class="k">type</span> <span class="n">path</span> <span class="o">=</span> <span class="n">elem</span> <span class="kt">list</span>
+
+  <span class="k">let</span> <span class="n">string_of_elem</span> <span class="o">=</span> <span class="k">function</span>
+    <span class="o">|</span> <span class="nc">Number</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">string_of_int</span> <span class="n">x</span>
+    <span class="o">|</span> <span class="nc">PDup</span> <span class="o">-&gt;</span> <span class="s2">&quot;@&quot;</span>
+    <span class="o">|</span> <span class="nc">Binary</span> <span class="nc">PAdd</span> <span class="o">-&gt;</span> <span class="s2">&quot;+&quot;</span>
+    <span class="o">|</span> <span class="nc">Binary</span> <span class="nc">PSub</span> <span class="o">-&gt;</span> <span class="s2">&quot;-&quot;</span>
+    <span class="o">|</span> <span class="nc">Binary</span> <span class="nc">PMul</span> <span class="o">-&gt;</span> <span class="s2">&quot;*&quot;</span>
+    <span class="o">|</span> <span class="nc">Binary</span> <span class="nc">PDiv</span> <span class="o">-&gt;</span> <span class="s2">&quot;/&quot;</span>
+    <span class="o">|</span> <span class="nc">Binary</span> <span class="nc">PMod</span> <span class="o">-&gt;</span> <span class="s2">&quot;%&quot;</span>
+
+  <span class="k">type</span> <span class="n">full_history</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="n">maxc</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">ref</span><span class="o">;</span>
+    <span class="n">best</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">int</span> <span class="o">*</span> <span class="n">elem</span> <span class="kt">list</span><span class="o">)</span> <span class="nn">H</span><span class="p">.</span><span class="n">t</span><span class="o">;</span> <span class="c">(* number -&gt; (cost, path) *)</span>
+    <span class="n">hist</span> <span class="o">:</span> <span class="o">(</span><span class="n">seq</span><span class="o">,</span> <span class="kt">int</span><span class="o">)</span> <span class="nn">H</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>             <span class="c">(* sequence -&gt; length of best path *)</span>
+    <span class="n">lim</span>  <span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+    <span class="n">def</span>  <span class="o">:</span> <span class="n">elem</span> <span class="kt">list</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="k">type</span> <span class="n">path_history</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="n">cost</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+    <span class="n">path</span> <span class="o">:</span> <span class="n">path</span><span class="o">;</span>
+    <span class="n">st_l</span> <span class="o">:</span> <span class="n">seq</span> <span class="kt">list</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">branch</span> <span class="n">path_h</span> <span class="n">full_h</span> <span class="o">=</span>
+      <span class="k">let</span> <span class="n">make_kids</span> <span class="n">acc</span> <span class="o">=</span> <span class="k">function</span>
+        <span class="o">|</span> <span class="nc">PDup</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">match</span> <span class="n">path_h</span><span class="o">.</span><span class="n">st_l</span> <span class="k">with</span>
+            <span class="o">|</span> <span class="o">(</span><span class="n">h</span> <span class="o">::</span> <span class="n">t</span><span class="o">)</span> <span class="o">::</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="nc">PDup</span><span class="o">,</span> <span class="n">path_h</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">h</span> <span class="o">::</span> <span class="n">h</span> <span class="o">::</span> <span class="n">t</span><span class="o">)</span> <span class="o">::</span> <span class="n">acc</span>
+            <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">acc</span><span class="o">)</span>
+        <span class="o">|</span> <span class="nc">Binary</span> <span class="n">x</span>
+          <span class="o">-&gt;</span> <span class="o">(</span><span class="k">match</span> <span class="n">path_h</span><span class="o">.</span><span class="n">st_l</span> <span class="k">with</span>
+              <span class="o">|</span> <span class="o">(</span><span class="n">a</span> <span class="o">::</span> <span class="n">b</span> <span class="o">::</span> <span class="n">t</span><span class="o">)</span> <span class="o">::</span> <span class="o">_</span> <span class="o">-&gt;</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">b</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">x</span> <span class="o">=</span> <span class="nc">PMod</span><span class="o">)</span> <span class="o">||</span>
+                   <span class="o">(</span><span class="n">a</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="n">x</span> <span class="o">=</span> <span class="nc">PDiv</span> <span class="o">||</span> <span class="n">x</span> <span class="o">=</span> <span class="nc">PMod</span><span class="o">))</span> <span class="k">then</span> <span class="n">acc</span>
+                <span class="k">else</span> <span class="k">let</span> <span class="n">ab_op</span> <span class="o">=</span> <span class="o">(</span><span class="k">match</span> <span class="n">x</span> <span class="k">with</span>
+                    <span class="o">|</span> <span class="nc">PAdd</span> <span class="o">-&gt;</span> <span class="n">b</span> <span class="o">+</span> <span class="n">a</span>
+                    <span class="o">|</span> <span class="nc">PSub</span> <span class="o">-&gt;</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span>
+                    <span class="o">|</span> <span class="nc">PMul</span> <span class="o">-&gt;</span> <span class="n">b</span> <span class="o">*</span> <span class="n">a</span>
+                    <span class="o">|</span> <span class="nc">PDiv</span> <span class="o">-&gt;</span> <span class="n">b</span> <span class="o">/</span> <span class="n">a</span>
+                    <span class="o">|</span> <span class="nc">PMod</span> <span class="o">-&gt;</span> <span class="n">b</span> <span class="ow">mod</span> <span class="n">a</span><span class="o">)</span> <span class="k">in</span>
+                  <span class="o">(</span><span class="nc">Binary</span> <span class="n">x</span><span class="o">,</span> <span class="n">path_h</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">ab_op</span> <span class="o">::</span> <span class="n">t</span><span class="o">)</span> <span class="o">::</span> <span class="n">acc</span>
+              <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">acc</span><span class="o">)</span>
+        <span class="o">|</span> <span class="nc">Number</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="nc">Number</span> <span class="n">x</span><span class="o">,</span> <span class="n">path_h</span><span class="o">.</span><span class="n">cost</span> <span class="o">+</span> <span class="n">x</span><span class="o">,</span>
+                       <span class="o">(</span><span class="k">match</span> <span class="n">path_h</span><span class="o">.</span><span class="n">st_l</span> <span class="k">with</span>
+                        <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="o">[</span><span class="n">x</span><span class="o">]</span>
+                        <span class="o">|</span> <span class="n">h</span> <span class="o">::</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">::</span> <span class="n">h</span><span class="o">))</span> <span class="o">::</span> <span class="n">acc</span> <span class="k">in</span>
+      <span class="k">let</span> <span class="n">traverse</span> <span class="n">path_h</span> <span class="n">fh</span> <span class="o">(</span><span class="n">el</span><span class="o">,</span> <span class="n">cost</span><span class="o">,</span> <span class="n">seq</span><span class="o">)</span> <span class="o">=</span>
+        <span class="k">if</span> <span class="n">cost</span> <span class="o">&gt;</span> <span class="o">!(</span><span class="n">fh</span><span class="o">.</span><span class="n">maxc</span><span class="o">)</span> <span class="k">then</span> <span class="n">fh</span>
+        <span class="k">else</span>
+          <span class="k">let</span> <span class="n">old_c</span> <span class="o">=</span> <span class="k">match</span> <span class="nn">H</span><span class="p">.</span><span class="n">find_option</span> <span class="n">fh</span><span class="o">.</span><span class="n">hist</span> <span class="n">seq</span> <span class="k">with</span>
+            <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span>
+            <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="n">int_max</span> <span class="k">in</span>
+          <span class="k">if</span> <span class="n">cost</span> <span class="o">&gt;=</span> <span class="n">old_c</span> <span class="k">then</span> <span class="n">fh</span>
+          <span class="k">else</span>
+            <span class="k">let</span> <span class="o">_</span> <span class="o">=</span>
+              <span class="nn">H</span><span class="p">.</span><span class="n">replace</span> <span class="n">fh</span><span class="o">.</span><span class="n">hist</span> <span class="n">seq</span> <span class="n">cost</span><span class="o">;</span>
+              <span class="k">if</span> <span class="nn">List</span><span class="p">.</span><span class="n">length</span> <span class="n">seq</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">then</span>
+                <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">hd</span> <span class="n">seq</span> <span class="k">in</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">then</span> <span class="bp">()</span> <span class="k">else</span>
+                  <span class="k">let</span> <span class="n">old_c</span> <span class="o">=</span> <span class="k">match</span> <span class="nn">H</span><span class="p">.</span><span class="n">find_option</span> <span class="n">fh</span><span class="o">.</span><span class="n">best</span> <span class="n">x</span> <span class="k">with</span>
+                    <span class="o">|</span> <span class="nc">Some</span> <span class="o">(</span><span class="n">y</span><span class="o">,</span> <span class="o">_)</span> <span class="o">-&gt;</span> <span class="n">y</span>
+                    <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="n">int_max</span> <span class="k">in</span>
+                  <span class="k">if</span> <span class="n">cost</span> <span class="o">&lt;</span> <span class="n">old_c</span> <span class="k">then</span> <span class="k">begin</span>
+                    <span class="nn">H</span><span class="p">.</span><span class="n">replace</span> <span class="n">fh</span><span class="o">.</span><span class="n">best</span> <span class="n">x</span> <span class="o">(</span><span class="n">cost</span><span class="o">,</span> <span class="n">el</span> <span class="o">::</span> <span class="n">path_h</span><span class="o">.</span><span class="n">path</span><span class="o">);</span>
+                    <span class="k">if</span> <span class="n">old_c</span> <span class="o">=</span> <span class="o">!(</span><span class="n">fh</span><span class="o">.</span><span class="n">maxc</span><span class="o">)</span> <span class="k">then</span>
+                      <span class="n">fh</span><span class="o">.</span><span class="n">maxc</span> <span class="o">:=</span>
+                        <span class="nn">List</span><span class="p">.</span><span class="n">range</span> <span class="mi">1</span> <span class="o">`</span><span class="nc">To</span> <span class="n">fh</span><span class="o">.</span><span class="n">lim</span>
+                        <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="n">fst</span> <span class="o">%</span> <span class="nn">H</span><span class="p">.</span><span class="n">find</span> <span class="n">fh</span><span class="o">.</span><span class="n">best</span><span class="o">)</span>
+                        <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">reduce</span> <span class="nn">BatInt</span><span class="p">.</span><span class="n">max</span>
+                  <span class="k">end</span>
+            <span class="k">in</span>
+            <span class="n">branch</span> <span class="o">{</span><span class="n">cost</span> <span class="o">=</span> <span class="n">cost</span><span class="o">;</span> <span class="n">path</span> <span class="o">=</span> <span class="n">el</span> <span class="o">::</span> <span class="n">path_h</span><span class="o">.</span><span class="n">path</span><span class="o">;</span>
+                    <span class="n">st_l</span> <span class="o">=</span> <span class="n">seq</span> <span class="o">::</span> <span class="n">path_h</span><span class="o">.</span><span class="n">st_l</span><span class="o">}</span> <span class="n">fh</span>
+      <span class="k">in</span>
+
+      <span class="k">if</span> <span class="o">(</span><span class="n">not</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">is_empty</span> <span class="n">path_h</span><span class="o">.</span><span class="n">st_l</span><span class="o">)</span> <span class="o">&amp;&amp;</span>
+         <span class="o">(</span><span class="nn">BatInt</span><span class="p">.</span><span class="n">max</span> <span class="mi">0</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">length</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">hd</span> <span class="n">path_h</span><span class="o">.</span><span class="n">st_l</span><span class="o">)</span> <span class="o">-</span> <span class="mi">1</span><span class="o">))</span> <span class="o">+</span> <span class="n">path_h</span><span class="o">.</span><span class="n">cost</span>
+         <span class="o">&gt;=</span> <span class="o">!(</span><span class="n">full_h</span><span class="o">.</span><span class="n">maxc</span><span class="o">))</span> <span class="k">then</span> <span class="n">full_h</span>
+      <span class="k">else</span>
+        <span class="n">full_h</span><span class="o">.</span><span class="n">def</span>
+        <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">fold_left</span> <span class="n">make_kids</span> <span class="bp">[]</span>
+        <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">fold_left</span> <span class="o">(</span><span class="n">traverse</span> <span class="n">path_h</span><span class="o">)</span> <span class="n">full_h</span>
+
+  <span class="k">let</span> <span class="n">find_all_cheaply</span> <span class="n">max_num</span> <span class="n">goal</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">start_path_h</span> <span class="o">=</span> <span class="o">{</span><span class="n">cost</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">path</span> <span class="o">=</span> <span class="bp">[]</span><span class="o">;</span> <span class="n">st_l</span> <span class="o">=</span> <span class="bp">[]</span><span class="o">;}</span> <span class="k">in</span>
+    <span class="k">let</span> <span class="n">start_full_h</span> <span class="n">guess</span> <span class="o">=</span> <span class="o">{</span>
+      <span class="n">best</span> <span class="o">=</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">range</span> <span class="mi">1</span> <span class="o">`</span><span class="nc">To</span> <span class="n">goal</span><span class="o">)</span>
+             <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="o">(</span><span class="n">guess</span><span class="o">,</span> <span class="bp">[]</span><span class="o">)))</span>
+             <span class="o">|&gt;</span> <span class="nn">H</span><span class="p">.</span><span class="n">of_list</span><span class="o">;</span>
+      <span class="n">maxc</span> <span class="o">=</span> <span class="n">ref</span> <span class="n">guess</span><span class="o">;</span>
+      <span class="n">hist</span> <span class="o">=</span> <span class="nn">H</span><span class="p">.</span><span class="n">create</span> <span class="mi">1024</span><span class="o">;</span>
+      <span class="n">def</span> <span class="o">=</span> <span class="o">[</span><span class="nc">PDup</span><span class="o">;]</span>
+            <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">append</span>
+               <span class="o">%</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="nc">Binary</span> <span class="n">x</span><span class="o">)</span> <span class="o">@@</span> <span class="o">[</span><span class="nc">PAdd</span><span class="o">;</span> <span class="nc">PSub</span><span class="o">;</span> <span class="nc">PMul</span><span class="o">;</span> <span class="nc">PDiv</span><span class="o">;</span> <span class="nc">PMod</span><span class="o">;]</span>
+            <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">append</span>
+               <span class="o">%</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="nc">Number</span> <span class="n">x</span><span class="o">)</span> <span class="o">@@</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">range</span> <span class="mi">1</span> <span class="o">`</span><span class="nc">To</span> <span class="n">max_num</span><span class="o">);</span>
+      <span class="n">lim</span> <span class="o">=</span> <span class="n">goal</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">in</span>
+
+    <span class="k">let</span> <span class="k">rec</span> <span class="n">run_branch</span> <span class="n">guess</span> <span class="n">full_h</span> <span class="o">=</span>
+      <span class="k">let</span> <span class="n">fh</span> <span class="o">=</span> <span class="n">branch</span> <span class="n">start_path_h</span> <span class="n">full_h</span> <span class="k">in</span>
+      <span class="c">(* retry if we didn&#39;t find a path for all numbers from 1 to goal *)</span>
+      <span class="k">if</span> <span class="nn">List</span><span class="p">.</span><span class="n">range</span> <span class="mi">1</span> <span class="o">`</span><span class="nc">To</span> <span class="n">goal</span>
+         <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">((=)</span> <span class="n">guess</span> <span class="o">%</span> <span class="n">fst</span> <span class="o">%</span> <span class="nn">H</span><span class="p">.</span><span class="n">find</span> <span class="n">fh</span><span class="o">.</span><span class="n">best</span><span class="o">)</span>
+         <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">reduce</span> <span class="o">(||)</span> <span class="k">then</span>
+        <span class="n">run_branch</span> <span class="o">(</span><span class="n">guess</span> <span class="o">+</span> <span class="mi">2</span><span class="o">)</span> <span class="o">(</span><span class="n">start_full_h</span> <span class="o">(</span><span class="n">guess</span> <span class="o">+</span> <span class="mi">2</span><span class="o">))</span>
+      <span class="k">else</span> <span class="n">fh</span>
+    <span class="k">in</span>
+
+    <span class="k">let</span> <span class="n">full_h</span> <span class="o">=</span> <span class="n">run_branch</span> <span class="mi">16</span> <span class="o">(</span><span class="n">start_full_h</span> <span class="mi">16</span><span class="o">)</span> <span class="k">in</span>
+    <span class="nn">List</span><span class="p">.</span><span class="n">range</span> <span class="mi">1</span> <span class="o">`</span><span class="nc">To</span> <span class="n">goal</span>
+    <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="k">fun</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="nn">H</span><span class="p">.</span><span class="n">find</span> <span class="n">full_h</span><span class="o">.</span><span class="n">best</span> <span class="n">a</span><span class="o">))</span>
+    <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="k">fun</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="o">(</span><span class="n">l</span><span class="o">,</span><span class="n">s</span><span class="o">))</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span><span class="n">l</span><span class="o">,</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">(</span><span class="n">string_of_elem</span><span class="o">)</span> <span class="o">@@</span> <span class="nn">List</span><span class="p">.</span><span class="n">rev</span> <span class="n">s</span><span class="o">))</span>
+    <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">sort</span> <span class="o">(</span><span class="k">fun</span> <span class="o">(</span><span class="n">a1</span><span class="o">,_,_)</span> <span class="o">(</span><span class="n">a2</span><span class="o">,_,_)</span> <span class="o">-&gt;</span> <span class="n">compare</span> <span class="n">a1</span> <span class="n">a2</span><span class="o">)</span>
+    <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span>
+      <span class="o">(</span><span class="k">fun</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span><span class="n">l</span><span class="o">,</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">let</span> <span class="o">_</span> <span class="o">=</span> <span class="n">print_endline</span> <span class="o">@@</span> <span class="nn">Printf</span><span class="p">.</span><span class="n">sprintf</span> <span class="s2">&quot;%5d %2d %s&quot;</span> <span class="n">a</span> <span class="n">l</span>
+                        <span class="o">@@</span> <span class="nn">List</span><span class="p">.</span><span class="n">fold_left</span> <span class="o">(^)</span> <span class="s2">&quot;&quot;</span> <span class="n">s</span> <span class="k">in</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span><span class="n">l</span><span class="o">,</span><span class="n">s</span><span class="o">))</span>
+
+<span class="k">end</span>
+
+<span class="k">let</span> <span class="o">_</span> <span class="o">=</span> <span class="nn">MakeCheap</span><span class="p">.</span><span class="n">find_all_cheaply</span> <span class="mi">5</span> <span class="mi">256</span></pre>
+<p>(I’ve for&shy;bid&shy;den the code from us&shy;ing mod&shy;u&shy;lo in case of neg&shy;a&shy;tive di&shy;vi&shy;sors
+for rea&shy;sons which I don’t want to go in here.)</p>
+</section>
+<section id="interesting-results">
+<h2>Interesting (?) results</h2>
+<p>The full re&shy;sults for 1 to 12,000 are avail&shy;able
+<a href="https://github.com/theindigamer/theindigamer.github.io/blob/e2ce7643d87fcadd4fa90e333bb33cb41b83eca8/data/results-12000.txt">here</a>.
+The first col&shy;umn is the num&shy;ber, the sec&shy;ond col&shy;umn is the low&shy;est cost
+pos&shy;si&shy;ble and the last col&shy;umn is one pos&shy;si&shy;ble low&shy;est cost path of
+op&shy;er&shy;a&shy;tions to con&shy;struct the num&shy;ber.</p>
+<p>The se&shy;quence at the start of the ar&shy;ti&shy;cle rep&shy;re&shy;sents the small&shy;est num&shy;bers
+for a giv&shy;en cost. I’ve put it in a cost -&gt; num&shy;ber for&shy;mat for con&shy;ve&shy;nience
+be&shy;low.</p>
+<p>1 -&gt; 1, 2 -&gt; 2, 3 -&gt; 3, 4 -&gt; 4, 5 -&gt; 5, 6 -&gt; 8, 7 -&gt; 7, 8 -&gt; 11, 9 -&gt;
+13, 10 -&gt; 22, 11 -&gt; 41, 12 -&gt; 44, 13 -&gt; 94, 14 -&gt; 176, 15 -&gt; 177, 16 -&gt;
+472, 17 -&gt; 697, 18 -&gt; 1067, 19 -&gt; 1391, 20 -&gt; 3557, 21 -&gt; 8493, …</p>
+<p>(Al&shy;so, I have the sus&shy;pi&shy;cion that the first cost 22 num&shy;ber is be&shy;tween
+12,000 and 16,000 giv&shy;en that my lap&shy;top ran out of swap space for 16,000
+:neu&shy;tral_&shy;face:.)</p>
+<p>This da&shy;ta ana&shy;lyis is eas&shy;i&shy;ly done us&shy;ing Python:</p>
+<pre class="m-code"><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="n">dfo</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;results-10000.txt&quot;</span><span class="p">,</span>
+        <span class="n">delim_whitespace</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;num&quot;</span><span class="p">,</span> <span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="s2">&quot;seq&quot;</span><span class="p">],</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">dfo</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cost&quot;</span><span class="p">,</span> <span class="s2">&quot;num&quot;</span><span class="p">])</span>
+<span class="n">grouped</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;cost&quot;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">grouped</span><span class="o">.</span><span class="n">first</span><span class="p">())</span></pre>
+<p>A scat&shy;ter plot of cost vs num&shy;ber is shown be&shy;low:</p>
+<figure class="m-figure">
+<img alt="Plot for cost vs number" src="http://i.imgur.com/AprHYSI.png" />
+<figcaption>Plot for cost vs num&shy;ber</figcaption>
+</figure>
+<p>Some oth&shy;er things I found cool (al&shy;though I con&shy;cede some are re&shy;lat&shy;ed to
+the im&shy;plic&shy;it or&shy;der&shy;ing of op&shy;er&shy;a&shy;tions &#64;, +, -, *, /, % in my code):</p>
+<ul class="simple">
+<li>The first num&shy;ber to use di&shy;vi&shy;sion is 187 in [5,&#64;,&#64;,*,*,&#64;,2,/,+]. Out
+of 12,000 paths, 899 use one or more di&shy;vi&shy;sion op&shy;er&shy;a&shy;tions (there are
+910 di&shy;vi&shy;sions in to&shy;tal).</li>
+<li>Ex&shy;act&shy;ly one num&shy;ber us&shy;es a mod&shy;u&shy;lo op&shy;er&shy;a&shy;tion – it is 9362 with the
+path [4,&#64;,*,&#64;,*,&#64;,*,&#64;,3,&#64;,*,%,/] of cost 18. This gen&shy;er&shy;ates
+65536, du&shy;pli&shy;cates it, does mod 9 (giv&shy;ing 7) and does 65536/7 = 9362
+(floored). Wow.</li>
+</ul>
+<p>(Python code for check&shy;ing sub&shy;strings:
+<code>dfo[dfo[&quot;seq&quot;].str.contains('/')]</code>.)</p>
+</section>
+<section id="get-in-touch">
+<h2>Get in touch!</h2>
+<p>If you have any ques&shy;tions or com&shy;ments, please <a href="https://github.com/theindigamer/theindigamer.github.io/issues">open an
+is&shy;sue</a>
+on this blog’s Github re&shy;po or send me an email: <code>theindigamer15</code>
+(gmail). 😄</p>
+</section>
+<!-- /content -->
+      <footer>
+        <p>Posted by <a href="https://theindigamer.github.io/author/varun-gandhi.html">Varun Gandhi</a> on <time datetime="2017-07-15T00:00:00-05:00">Sat 15 July 2017</time> in <a href="https://theindigamer.github.io/category/programming.html ">programming</a>. Tags: <a href="https://theindigamer.github.io/tag/piet.html">piet</a>, <a href="https://theindigamer.github.io/tag/math.html">math</a>, <a href="https://theindigamer.github.io/tag/ocaml.html">ocaml</a>.</p>
+      </footer>
+    </article>
+    <nav class="m-navpanel m-col-m-2">
+      <h3>Cate&shy;gories</h3>
+      <ol class="m-block-bar-m">
+        <li><a href="https://theindigamer.github.io/category/fiction.html">fic&shy;tion</a></li>
+        <li><a href="https://theindigamer.github.io/category/grad-school.html">grad school</a></li>
+        <li><a href="https://theindigamer.github.io/category/misc.html">misc</a></li>
+        <li><a href="https://theindigamer.github.io/category/movies.html">movies</a></li>
+        <li><a href="https://theindigamer.github.io/category/programming.html">pro&shy;gram&shy;ming</a></li>
+      </ol>
+      <h3>Tag cloud</h3>
+      <ul class="m-tagcloud">
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/haskell.html">haskell</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/languages.html">languages</a></li>
+        <li class="m-tag-5"><a href="https://theindigamer.github.io/tag/math.html">math</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/ocaml.html">ocaml</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/ordinals.html">ordinals</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/piet.html">piet</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/programming.html">programming</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/project-euler.html">project euler</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/python.html">python</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/rust.html">rust</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/spirited-away.html">spirited away</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/studio-ghibli.html">studio ghibli</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+</main>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-s-3 m-col-t-6">
+      </div>
+      <div class="m-col-s-3 m-col-t-6">
+      </div>
+      <div class="m-clearfix-t"></div>
+      <div class="m-col-s-3 m-col-t-6">
+      </div>
+      <div class="m-col-s-3 m-col-t-6">
+      </div>
+    </div>
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Copy&shy;right © 2017
+          Varun Gand&shy;hi
+          - Text li&shy;censed un&shy;der <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY SA 4.0</a>
+          and Code li&shy;censed un&shy;der <a href="https://opensource.org/licenses/MIT">MIT</a>
+          un&shy;less ex&shy;plic&shy;it&shy;ly stat&shy;ed oth&shy;er&shy;wise
+          - Pow&shy;ered by <a href="https://getpelican.com">Pel&shy;i&shy;can</a> and
+          <a href="http://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
