@@ -87,9 +87,9 @@ With great pow&amp;shy;er come not-so-great type er&amp;shy;rors/com&amp;shy;pil
 ab&amp;shy;strac&amp;shy;tions with&amp;shy;out (a) a clear-cut pow&amp;shy;er-to-weight ra&amp;shy;tio and (b) the abil&amp;shy;i&amp;shy;ty
 to dig your&amp;shy;self out of a type-check&amp;shy;ing er&amp;shy;ror when need&amp;shy;ed. Two cas&amp;shy;es in point:&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;We ini&amp;shy;tial&amp;shy;ly mod&amp;shy;eled our AST as a pair of mu&amp;shy;tu&amp;shy;al&amp;shy;ly re&amp;shy;cur&amp;shy;sive cofree comon&amp;shy;ads
-– one for state&amp;shy;ments and one for ex&amp;shy;pres&amp;shy;sions. At some point, we hit this strange
-type er&amp;shy;ror which we couldn’t fig&amp;shy;ure out how to work around (de&amp;shy;spite be&amp;shy;ing at it
+&lt;li&gt;We ini&amp;shy;tial&amp;shy;ly mod&amp;shy;eled our AST as a pair of nest&amp;shy;ed cofree comon&amp;shy;ads
+– one for ex&amp;shy;pres&amp;shy;sions in&amp;shy;side an&amp;shy;oth&amp;shy;er for state&amp;shy;ments. At some point, we hit this
+strange type er&amp;shy;ror which we couldn’t fig&amp;shy;ure out how to work around (de&amp;shy;spite be&amp;shy;ing at it
 for a few hours). Even&amp;shy;tu&amp;shy;al&amp;shy;ly we had to re&amp;shy;write a large chunks of the code and
 get rid of it en&amp;shy;tire&amp;shy;ly. One of my team-mates did even&amp;shy;tu&amp;shy;al&amp;shy;ly fig&amp;shy;ure out
 how to get it to work about a week lat&amp;shy;er (rough&amp;shy;ly speak&amp;shy;ing, my mem&amp;shy;o&amp;shy;ry is fuzzy).&lt;/li&gt;
