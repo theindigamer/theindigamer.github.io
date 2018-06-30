@@ -1,5 +1,257 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Nocturne in Prose and Code</title><link href="https://theindigamer.github.io/" rel="alternate"></link><link href="https://theindigamer.github.io/feeds/all.atom.xml" rel="self"></link><id>https://theindigamer.github.io/</id><updated>2017-12-05T00:00:00-05:00</updated><entry><title>Language Zoo</title><link href="https://theindigamer.github.io/language-zoo.html" rel="alternate"></link><published>2017-12-05T00:00:00-05:00</published><updated>2017-12-05T00:00:00-05:00</updated><author><name>Varun Gandhi</name></author><id>tag:theindigamer.github.io,2017-12-05:/language-zoo.html</id><summary type="html">&lt;p&gt;Once up&amp;shy;on a time, the biobots sim&amp;shy;ply had stones and wood.
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Nocturne in Prose and Code</title><link href="https://theindigamer.github.io/" rel="alternate"></link><link href="https://theindigamer.github.io/feeds/all.atom.xml" rel="self"></link><id>https://theindigamer.github.io/</id><updated>2018-06-30T00:00:00-05:00</updated><entry><title>10 Commandments (Compiler in Haskell edition)</title><link href="https://theindigamer.github.io/10-commandments-compiler-in-haskell-edition.html" rel="alternate"></link><published>2018-06-30T00:00:00-05:00</published><updated>2018-06-30T00:00:00-05:00</updated><author><name>Varun Gandhi</name></author><id>tag:theindigamer.github.io,2018-06-30:/10-commandments-compiler-in-haskell-edition.html</id><summary type="html">&lt;p&gt;Dur&amp;shy;ing the spring se&amp;shy;mes&amp;shy;ter of 2018, I took a ba&amp;shy;sic com&amp;shy;pil&amp;shy;ers course
+– our team chose to write the com&amp;shy;pil&amp;shy;er in Haskell. This is a chron&amp;shy;i&amp;shy;cle/post-mortem/ran&amp;shy;dom
+hodge&amp;shy;podge of my thoughts.&lt;/p&gt;
+</summary><content type="html">&lt;section id="i-am-the-lambda-thy-god-which-have-brought-thee-out-of-the-land-of-oo-out-of-the-house-of-bondage"&gt;
+&lt;h2&gt;I am the Lambda thy God, which have brought thee out of the land of OO, out of the house of bondage.&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A func&amp;shy;tion&amp;shy;al lan&amp;shy;guage is a do&amp;shy;main-spe&amp;shy;cif&amp;shy;ic lan&amp;shy;guage for cre&amp;shy;at&amp;shy;ing do&amp;shy;main-spe&amp;shy;cif&amp;shy;ic lan&amp;shy;guages.&lt;/p&gt;
+&lt;p class="attribution"&gt;—Lamb&amp;shy;daMan (a.k.a. Philip Wadler)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;Fact: ADTs and ASTs are like peanut but&amp;shy;ter and jel&amp;shy;ly, un&amp;shy;less you’re al&amp;shy;ler&amp;shy;gic to func&amp;shy;tion&amp;shy;al
+pro&amp;shy;gram&amp;shy;ming, in which case, please ac&amp;shy;cept my con&amp;shy;do&amp;shy;lences.&lt;/li&gt;
+&lt;li&gt;Fact: Pat&amp;shy;tern match&amp;shy;ing is just nerd&amp;shy;speak for awe&amp;shy;some&amp;shy;ness.&lt;/li&gt;
+&lt;li&gt;Fact: Func&amp;shy;tion&amp;shy;al pro&amp;shy;gram&amp;shy;ming is ba&amp;shy;si&amp;shy;cal&amp;shy;ly tetris but with a wider range of side ef&amp;shy;fects al&amp;shy;lowed.&lt;/li&gt;
+&lt;li&gt;Fact: If it type checks, it must be cor&amp;shy;rect.&lt;/li&gt;
+&lt;li&gt;Fact: Paren&amp;shy;the&amp;shy;ses are evil (ob&amp;shy;vi&amp;shy;ous&amp;shy;ly).&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Hope&amp;shy;ful&amp;shy;ly, our team’s choice of us&amp;shy;ing Haskell for the com&amp;shy;pil&amp;shy;er is clear&amp;shy;er now.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="thou-shalt-have-no-other-gods-before-me"&gt;
+&lt;h2&gt;Thou shalt have no other gods before me.&lt;/h2&gt;
+&lt;p&gt;Al&amp;shy;most ev&amp;shy;ery&amp;shy;thing in Haskell re&amp;shy;volves around func&amp;shy;tions/ap&amp;shy;pli&amp;shy;ca&amp;shy;tion. Con&amp;shy;se&amp;shy;quent&amp;shy;ly,
+you can do a &lt;em&gt;lot&lt;/em&gt; of things in a sim&amp;shy;i&amp;shy;lar way (bar&amp;shy;ring the fact the Haskell isn’t
+de&amp;shy;pen&amp;shy;dent&amp;shy;ly typed yet):&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Or&amp;shy;di&amp;shy;nary val&amp;shy;ue-lev&amp;shy;el func&amp;shy;tions have types &lt;code&gt;a1 -&amp;gt; a2&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;(G)ADT val&amp;shy;ue con&amp;shy;struc&amp;shy;tors can be ap&amp;shy;plied and com&amp;shy;posed like val&amp;shy;ue-lev&amp;shy;el func&amp;shy;tions.&lt;/li&gt;
+&lt;li&gt;Records fields can be used as val&amp;shy;ue-lev&amp;shy;el func&amp;shy;tions for pro&amp;shy;jec&amp;shy;tion.
+(This is prob&amp;shy;a&amp;shy;bly a bad de&amp;shy;fault, but hey, at least it is con&amp;shy;sis&amp;shy;tent!)&lt;/li&gt;
+&lt;li&gt;Val&amp;shy;ues can be grouped and passed around.&lt;/li&gt;
+&lt;li&gt;Type fam&amp;shy;i&amp;shy;lies (type-lev&amp;shy;el func&amp;shy;tions) have &lt;em&gt;kinds&lt;/em&gt; &lt;code&gt;k1 -&amp;gt; k2&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Type con&amp;shy;struc&amp;shy;tors can be ap&amp;shy;plied and com&amp;shy;posed like type-lev&amp;shy;el func&amp;shy;tions (&lt;a class="footnote-reference brackets" href="#id5" id="id1"&gt;1&lt;/a&gt;).
+They can al&amp;shy;so be ab&amp;shy;stract&amp;shy;ed over.&lt;/li&gt;
+&lt;li&gt;Type class&amp;shy;es can be used as type lev&amp;shy;el func&amp;shy;tions (via &lt;code&gt;ConstraintKinds&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;Con&amp;shy;straints can be grouped and passed around.&lt;/li&gt;
+&lt;li&gt;Adding a small amount of prim&amp;shy;i&amp;shy;tives gives you &lt;code&gt;Q&lt;/code&gt; where you
+can ma&amp;shy;nip&amp;shy;u&amp;shy;late Haskell code us&amp;shy;ing (you guessed it) the usu&amp;shy;al pat&amp;shy;tern match&amp;shy;ing,
+func&amp;shy;tions, types and type class&amp;shy;es.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+&lt;section id="thou-shalt-not-take-the-name-of-the-lambda-thy-god-in-vain"&gt;
+&lt;h2&gt;Thou shalt not take the name of the Lambda thy God in vain.&lt;/h2&gt;
+&lt;p&gt;(Au&amp;shy;thor’s note: a more ap&amp;shy;pro&amp;shy;pri&amp;shy;ate sub&amp;shy;ti&amp;shy;tle would be “Thou shalt be smug about
+hav&amp;shy;ing high&amp;shy;er-rank poly&amp;shy;mor&amp;shy;phism” but I didn’t want to ru&amp;shy;in the theme. 😐)&lt;/p&gt;
+&lt;p&gt;It’s not of&amp;shy;ten that I think to my&amp;shy;self, “this can&amp;shy;not pos&amp;shy;si&amp;shy;bly work as ad&amp;shy;ver&amp;shy;tised”.
+Well, you can imag&amp;shy;ine my amaze&amp;shy;ment when I learned about SYB and lens&amp;shy;es.
+I still don’t ful&amp;shy;ly un&amp;shy;der&amp;shy;stand how ei&amp;shy;ther of them work (or for that mat&amp;shy;ter, the
+sig&amp;shy;na&amp;shy;tures in &lt;code&gt;Data.Data&lt;/code&gt;) but that’s ok. Nat&amp;shy;u&amp;shy;ral&amp;shy;ly, when both of these
+do a fu&amp;shy;sion dance, you get fire&amp;shy;works:&lt;/p&gt;
+&lt;pre&gt;Data.Data.Lens.template :: forall s a. (Data s, Typeable a) =&amp;gt; Traversal' s a&lt;/pre&gt;
+&lt;p&gt;Yup, you read that right. Just slap some &lt;code&gt;deriving (Typeable, Data)&lt;/code&gt; on your
+AST nodes and you get to tra&amp;shy;verse stuff in a very flex&amp;shy;i&amp;shy;ble way by just
+spec&amp;shy;i&amp;shy;fy&amp;shy;ing the types of the things you want. &lt;a href="https://i.imgur.com/lBYwEDm.gif"&gt;Wow.&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Steal&amp;shy;ing from the pa&amp;shy;per &lt;em&gt;Prac&amp;shy;ti&amp;shy;cal type in&amp;shy;fer&amp;shy;ence for ar&amp;shy;bi&amp;shy;trary-rank types&lt;/em&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+[..] high&amp;shy;er-rank types are def&amp;shy;i&amp;shy;nite&amp;shy;ly use&amp;shy;ful, oc&amp;shy;ca&amp;shy;sion&amp;shy;al&amp;shy;ly in&amp;shy;dis&amp;shy;pens&amp;shy;able, and
+much eas&amp;shy;i&amp;shy;er to im&amp;shy;ple&amp;shy;ment than one might guess. Ev&amp;shy;ery lan&amp;shy;guage should have them!&lt;/blockquote&gt;
+&lt;/section&gt;
+&lt;section id="thou-shalt-not-make-unto-thee-any-gratuitous-punctuation"&gt;
+&lt;h2&gt;Thou shalt not make unto thee any gratuitous punctuation.&lt;/h2&gt;
+&lt;p&gt;Af&amp;shy;ter us&amp;shy;ing Haskell, near&amp;shy;ly all oth&amp;shy;er main&amp;shy;stream lan&amp;shy;guages seem over&amp;shy;ly
+rid&amp;shy;dled with punc&amp;shy;tu&amp;shy;a&amp;shy;tion. While I’m guess&amp;shy;ing white&amp;shy;space sen&amp;shy;si&amp;shy;tiv&amp;shy;i&amp;shy;ty must
+be an&amp;shy;noy&amp;shy;ing for peo&amp;shy;ple writ&amp;shy;ing tool&amp;shy;ing, it does aid read&amp;shy;abil&amp;shy;i&amp;shy;ty a
+lot.&lt;/p&gt;
+&lt;p&gt;Case in point - I’ve been writ&amp;shy;ing some C++ late&amp;shy;ly, which in case you don’t
+know, is a lan&amp;shy;guage best de&amp;shy;scribed as spicy punc&amp;shy;tu&amp;shy;a&amp;shy;tion cur&amp;shy;ry (not the fun kind
+of cur&amp;shy;ry) plus some al&amp;shy;phanu&amp;shy;mer&amp;shy;ic sea&amp;shy;son&amp;shy;ing sprin&amp;shy;kled on top. I’ve been get&amp;shy;ting a
+few miss&amp;shy;ing “;” er&amp;shy;rors over the past month, and I haven’t reached the point
+where I stop telling the com&amp;shy;pil&amp;shy;er “aww, fuck off, why don’t you in&amp;shy;sert it your&amp;shy;self”.&lt;/p&gt;
+&lt;p&gt;Of course, this doesn’t mean that ev&amp;shy;ery&amp;shy;thing is per&amp;shy;fect – some li&amp;shy;braries
+de&amp;shy;fine a lot of op&amp;shy;er&amp;shy;a&amp;shy;tors (yes, we all know which one I’m talk&amp;shy;ing about) and
+while in&amp;shy;ter&amp;shy;nal&amp;shy;is&amp;shy;ing the “log&amp;shy;ic” be&amp;shy;hind the sym&amp;shy;bols can be help&amp;shy;ful while
+writ&amp;shy;ing code (&lt;a class="footnote-reference brackets" href="#id6" id="id2"&gt;2&lt;/a&gt;), read&amp;shy;ing some&amp;shy;one else’s code writ&amp;shy;ten us&amp;shy;ing them feels like
+read&amp;shy;ing golfed code with&amp;shy;out the irony.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="thou-shalt-not-unsafecoerce"&gt;
+&lt;h2&gt;Thou shalt not unsafeCoerce.&lt;/h2&gt;
+&lt;p&gt;I re&amp;shy;call read&amp;shy;ing some&amp;shy;where that ev&amp;shy;ery time you use &lt;code&gt;unsafeCoerce&lt;/code&gt;, a pup&amp;shy;py dies.
+As much as it shames me to ad&amp;shy;mit it, we killed two pup&amp;shy;pies. RIP good boys.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="thou-shalt-not-over-abstract"&gt;
+&lt;h2&gt;Thou shalt not over-abstract.&lt;/h2&gt;
+&lt;blockquote&gt;
+With great pow&amp;shy;er come not-so-great type er&amp;shy;rors/com&amp;shy;pile times.&lt;/blockquote&gt;
+&lt;p&gt;Us&amp;shy;ing Haskell, it is very easy to get car&amp;shy;ried away and use lots of fan&amp;shy;cy
+ab&amp;shy;strac&amp;shy;tions with&amp;shy;out (a) a clear-cut pow&amp;shy;er-to-weight ra&amp;shy;tio and (b) the abil&amp;shy;i&amp;shy;ty
+to dig your&amp;shy;self out of a type-check&amp;shy;ing er&amp;shy;ror when need&amp;shy;ed. Two cas&amp;shy;es in point:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;We ini&amp;shy;tial&amp;shy;ly mod&amp;shy;eled our AST as a pair of mu&amp;shy;tu&amp;shy;al&amp;shy;ly re&amp;shy;cur&amp;shy;sive cofree comon&amp;shy;ads
+– one for state&amp;shy;ments and one for ex&amp;shy;pres&amp;shy;sions. At some point, we hit this strange
+type er&amp;shy;ror which we couldn’t fig&amp;shy;ure out how to work around (de&amp;shy;spite be&amp;shy;ing at it
+for a few hours). Even&amp;shy;tu&amp;shy;al&amp;shy;ly we had to re&amp;shy;write a large chunks of the code and
+get rid of it en&amp;shy;tire&amp;shy;ly. One of my team-mates did even&amp;shy;tu&amp;shy;al&amp;shy;ly fig&amp;shy;ure out
+how to get it to work about a week lat&amp;shy;er (rough&amp;shy;ly speak&amp;shy;ing, my mem&amp;shy;o&amp;shy;ry is fuzzy).&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Our ap&amp;shy;proach to unit-test&amp;shy;ing in&amp;shy;volved map&amp;shy;ping all the AST an&amp;shy;no&amp;shy;ta&amp;shy;tions to &lt;code&gt;()&lt;/code&gt;,
+and check&amp;shy;ing against the AST by hand. We al&amp;shy;so had some oth&amp;shy;er in&amp;shy;vari&amp;shy;ants, such
+as in&amp;shy;te&amp;shy;ger lit&amp;shy;er&amp;shy;als be&amp;shy;ing rep&amp;shy;re&amp;shy;sent&amp;shy;ed by &lt;code&gt;Integer&lt;/code&gt; while pars&amp;shy;ing and as &lt;code&gt;Int&lt;/code&gt;
+af&amp;shy;ter type&amp;shy;check&amp;shy;ing (the lan&amp;shy;guage on&amp;shy;ly sup&amp;shy;port&amp;shy;ed 64-bit val&amp;shy;ues).
+While the Trees That Grow ap&amp;shy;proach seemed per&amp;shy;fect for en&amp;shy;forc&amp;shy;ing in&amp;shy;vari&amp;shy;ants
+stat&amp;shy;i&amp;shy;cal&amp;shy;ly across com&amp;shy;pil&amp;shy;er phas&amp;shy;es, it lead to (a) very long com&amp;shy;pile times once
+we added in more in&amp;shy;vari&amp;shy;ants, as a large por&amp;shy;tion of the com&amp;shy;pil&amp;shy;er’s mod&amp;shy;ules
+tran&amp;shy;si&amp;shy;tive&amp;shy;ly de&amp;shy;pend&amp;shy;ed on the AST mod&amp;shy;ule, and (b) a lot of boil&amp;shy;er&amp;shy;plate for
+de&amp;shy;riv&amp;shy;ing in&amp;shy;stances and re&amp;shy;mov&amp;shy;ing an&amp;shy;no&amp;shy;ta&amp;shy;tions as we couldn’t just do
+&lt;code&gt;() &amp;lt;$&lt;/code&gt; (type fam&amp;shy;i&amp;shy;lies can&amp;shy;not be par&amp;shy;tial&amp;shy;ly ap&amp;shy;plied).&lt;/p&gt;
+&lt;p&gt;In the end, this “fea&amp;shy;ture” was nev&amp;shy;er merged in&amp;shy;to the mas&amp;shy;ter branch.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Oh, I for&amp;shy;got the men&amp;shy;tion the best bit: we bat&amp;shy;tled er&amp;shy;ror mes&amp;shy;sages with
+rigid skolems, in&amp;shy;fi&amp;shy;nite types, un&amp;shy;touch&amp;shy;able type vari&amp;shy;ables, “sor&amp;shy;ry, we don’t
+sup&amp;shy;port im&amp;shy;pred&amp;shy;ica&amp;shy;tive poly&amp;shy;mor&amp;shy;phism” (this one was my per&amp;shy;son&amp;shy;al favourite),
+what have you, and (to top it all off?) in&amp;shy;fre&amp;shy;quent/ran&amp;shy;dom link&amp;shy;er er&amp;shy;rors on one
+guy’s ma&amp;shy;chine. Brb af&amp;shy;ter writ&amp;shy;ing a pure link&amp;shy;er.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="thou-shalt-not-take-performance-for-granted"&gt;
+&lt;h2&gt;Thou shalt not take performance for granted.&lt;/h2&gt;
+&lt;p&gt;One of the ma&amp;shy;jor road&amp;shy;blocks in writ&amp;shy;ing the com&amp;shy;pil&amp;shy;er was in get&amp;shy;ting the graph-col&amp;shy;or&amp;shy;ing
+based reg&amp;shy;is&amp;shy;ter al&amp;shy;lo&amp;shy;ca&amp;shy;tor (1) cor&amp;shy;rect and (2) fast enough. While there isn’t much that
+could be done about (1), us&amp;shy;ing &lt;code&gt;fgl&lt;/code&gt; – one of the more pop&amp;shy;u&amp;shy;lar graph li&amp;shy;braries –
+proved to be a bad choice. It isn’t clear whether we were us&amp;shy;ing the li&amp;shy;brary wrong or
+whether we had hit a fun&amp;shy;da&amp;shy;men&amp;shy;tal lim&amp;shy;i&amp;shy;ta&amp;shy;tion. Even&amp;shy;tu&amp;shy;al&amp;shy;ly, we bor&amp;shy;rowed ideas from GHC’s
+own im&amp;shy;ple&amp;shy;men&amp;shy;ta&amp;shy;tion to get the al&amp;shy;lo&amp;shy;ca&amp;shy;tor to work in re&amp;shy;spectable time.&lt;/p&gt;
+&lt;p&gt;We had al&amp;shy;so con&amp;shy;sid&amp;shy;ered us&amp;shy;ing &lt;code&gt;alga&lt;/code&gt; be&amp;shy;fore we de&amp;shy;cid&amp;shy;ed against it be&amp;shy;cause (1)
+it seemed to have few&amp;shy;er helper func&amp;shy;tions to work with and (2) the bench&amp;shy;marks at
+the time didn’t give us enough con&amp;shy;fi&amp;shy;dence to try a new&amp;shy;er li&amp;shy;brary over an old&amp;shy;er one.
+Hope&amp;shy;ful&amp;shy;ly, some&amp;shy;one can use Lin&amp;shy;ear Haskell to come up with a fast, gen&amp;shy;er&amp;shy;al-pur&amp;shy;pose graph
+li&amp;shy;brary 😅.&lt;/p&gt;
+&lt;p&gt;Sim&amp;shy;i&amp;shy;lar&amp;shy;ly, al&amp;shy;though pars&amp;shy;er com&amp;shy;bi&amp;shy;na&amp;shy;tors prove to be very read&amp;shy;able (as op&amp;shy;posed to
+us&amp;shy;ing a lex&amp;shy;er/pars&amp;shy;er gen&amp;shy;er&amp;shy;a&amp;shy;tor), we once hit an is&amp;shy;sue where 1/3rd of the com&amp;shy;pi&amp;shy;la&amp;shy;tion
+time in the lex&amp;shy;er (!). The prob&amp;shy;lem was that we were care&amp;shy;less&amp;shy;ly us&amp;shy;ing Mega&amp;shy;parsec’s &lt;cite&gt;try&lt;/cite&gt;
+in sev&amp;shy;er&amp;shy;al places, lead&amp;shy;ing to a lot of un&amp;shy;nec&amp;shy;es&amp;shy;sary back-track&amp;shy;ing and failed at&amp;shy;tempts.&lt;/p&gt;
+&lt;p&gt;As I wrote ear&amp;shy;li&amp;shy;er, one prob&amp;shy;lem with us&amp;shy;ing fan&amp;shy;cy ab&amp;shy;strac&amp;shy;tions is that it can get
+hard to rea&amp;shy;son about per&amp;shy;for&amp;shy;mance. The &lt;code&gt;containers&lt;/code&gt; li&amp;shy;brary is prob&amp;shy;a&amp;shy;bly one of the
+best in this re&amp;shy;gard, it clear&amp;shy;ly out&amp;shy;lines what one should ex&amp;shy;pect from dif&amp;shy;fer&amp;shy;ent
+op&amp;shy;er&amp;shy;a&amp;shy;tions, as well as pro&amp;shy;vides a suf&amp;shy;fi&amp;shy;cient&amp;shy;ly rich and con&amp;shy;ve&amp;shy;nient API to work in a
+pure&amp;shy;ly func&amp;shy;tion&amp;shy;al set&amp;shy;ting.&lt;/p&gt;
+&lt;p&gt;P.S. The RTS made pro&amp;shy;fil&amp;shy;ing su&amp;shy;per con&amp;shy;ve&amp;shy;nient here. We used GHC’s json dumps +
+&lt;code&gt;ghc-aeson-flamegraph&lt;/code&gt; + Bren&amp;shy;dan Gregg’s &lt;code&gt;flamegraph.pl&lt;/code&gt; to eas&amp;shy;i&amp;shy;ly vi&amp;shy;su&amp;shy;al&amp;shy;ize
+bot&amp;shy;tle&amp;shy;necks in the code.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="thou-shalt-not-fall-in-love-with-laziness-for-it-is-a-fickle-mistress"&gt;
+&lt;h2&gt;Thou shalt not fall in love with laziness, for it is a fickle mistress.&lt;/h2&gt;
+&lt;p&gt;Lazi&amp;shy;ness is awe&amp;shy;some. When it works. And then it doesn’t. And you’re try&amp;shy;ing to de&amp;shy;bug
+things and putting &lt;code&gt;traceXXX&lt;/code&gt; and &lt;code&gt;deepseq&lt;/code&gt; ev&amp;shy;ery&amp;shy;where. And things still get
+print&amp;shy;ed in a weird or&amp;shy;der, be&amp;shy;cause you in&amp;shy;evitably for&amp;shy;got to an&amp;shy;no&amp;shy;tate one of the guys.&lt;/p&gt;
+&lt;p&gt;Lazi&amp;shy;ness is al&amp;shy;so not good for per&amp;shy;for&amp;shy;mance in a lot of cas&amp;shy;es, apart from the
+handy fact that it makes pro&amp;shy;grams with in&amp;shy;fi&amp;shy;nite struc&amp;shy;tures ter&amp;shy;mi&amp;shy;nate. When&amp;shy;ev&amp;shy;er
+you’re deal&amp;shy;ing with fi&amp;shy;nite struc&amp;shy;tures, hav&amp;shy;ing strict&amp;shy;ness for fields is bet&amp;shy;ter
+in a lot of cas&amp;shy;es. For ex&amp;shy;am&amp;shy;ple, &lt;code&gt;containers&lt;/code&gt; us&amp;shy;es strict&amp;shy;ness in sev&amp;shy;er&amp;shy;al places
+and sev&amp;shy;er&amp;shy;al per&amp;shy;for&amp;shy;mance-ori&amp;shy;ent&amp;shy;ed pre&amp;shy;sen&amp;shy;ta&amp;shy;tions talk about avoid lazi&amp;shy;ness and
+its part&amp;shy;ner-in-crime boxed fields.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="thou-shalt-not-covet-thy-neighbour-s-package-manager"&gt;
+&lt;h2&gt;Thou shalt not covet thy neighbour’s package manager.&lt;/h2&gt;
+&lt;p&gt;Haskell has sev&amp;shy;er&amp;shy;al “de&amp;shy;pen&amp;shy;den&amp;shy;cy man&amp;shy;age&amp;shy;ment so&amp;shy;lu&amp;shy;tions” which I guess is some&amp;shy;where
+in be&amp;shy;tween C++ where you’re sup&amp;shy;posed to lose your hair try&amp;shy;ing to get things to
+work (and once it does, refuse to up&amp;shy;grade any&amp;shy;thing lest it break)
+and Rust where you can prob&amp;shy;a&amp;shy;bly do
+&lt;code&gt;cargo install cargo-haircut &amp;amp;&amp;amp; cargo haircut&lt;/code&gt; and have it do the ob&amp;shy;vi&amp;shy;ous
+with&amp;shy;out get&amp;shy;ting your ass off your com&amp;shy;fy so&amp;shy;fa.&lt;/p&gt;
+&lt;p&gt;In my lit&amp;shy;tle ex&amp;shy;pe&amp;shy;ri&amp;shy;ence, while &lt;code&gt;stack&lt;/code&gt; does work most of time, it suf&amp;shy;fers from a
+lot of bloat which can cause is&amp;shy;sues if stor&amp;shy;age space/pro&amp;shy;ces&amp;shy;sor speed are not
+avail&amp;shy;able eas&amp;shy;i&amp;shy;ly – I’m guess&amp;shy;ing this is most&amp;shy;ly a stu&amp;shy;dent bud&amp;shy;get/old lap&amp;shy;top is&amp;shy;sue
+that pro&amp;shy;fes&amp;shy;sion&amp;shy;al Haskellers don’t en&amp;shy;counter (for ref&amp;shy;er&amp;shy;ence, I’ve been us&amp;shy;ing a
+Thinkpad X230 with a 256GB SSD and at some point had &lt;code&gt;~/.stack&lt;/code&gt; at size
+&lt;code&gt;25 GB+&lt;/code&gt;). It would be nice if &lt;code&gt;stack&lt;/code&gt; of&amp;shy;fered a clean way to unin&amp;shy;stall things
+– since it doesn’t, the op&amp;shy;tions left are (a) te&amp;shy;dious: use &lt;code&gt;ghc-unregister&lt;/code&gt;
+to unin&amp;shy;stall stuff and cor&amp;shy;re&amp;shy;spond&amp;shy;ing de&amp;shy;pen&amp;shy;den&amp;shy;cies or (b) slow: nuke &lt;code&gt;~/.stack&lt;/code&gt;,
+re&amp;shy;run &lt;code&gt;stack build&lt;/code&gt; and wait for it to re&amp;shy;com&amp;shy;pile the uni&amp;shy;verse (&lt;a class="footnote-reference brackets" href="#id7" id="id3"&gt;3&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;On a more pos&amp;shy;i&amp;shy;tive note, &lt;code&gt;cabal new-build&lt;/code&gt; does seem to work bet&amp;shy;ter than
+&lt;code&gt;cabal sandbox&lt;/code&gt;, so I have my fin&amp;shy;gers crossed that healthy com&amp;shy;pe&amp;shy;ti&amp;shy;tion be&amp;shy;tween
+the projects makes both of them bet&amp;shy;ter in the fu&amp;shy;ture. Or the Nix hip&amp;shy;pies be&amp;shy;come
+our new over&amp;shy;lords. Not be&amp;shy;ing picky here.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="remember-the-refactor-day-to-keep-it-holy"&gt;
+&lt;h2&gt;Remember the refactor day, to keep it holy.&lt;/h2&gt;
+&lt;p&gt;Haskell makes refac&amp;shy;tor&amp;shy;ing a breeze. To be more pre&amp;shy;cise, equa&amp;shy;tion&amp;shy;al rea&amp;shy;son&amp;shy;ing
+makes refac&amp;shy;tor&amp;shy;ing a breeze. Refac&amp;shy;tor&amp;shy;ing is, in essence a process of term
+rewrit&amp;shy;ing, and be&amp;shy;ing able to quick&amp;shy;ly sub&amp;shy;sti&amp;shy;tute like-for-like with&amp;shy;out wor&amp;shy;ry&amp;shy;ing
+about state, or fac&amp;shy;tor out com&amp;shy;mon&amp;shy;ly used code pieces is close to ef&amp;shy;fort&amp;shy;less
+in Haskell. Type in&amp;shy;fer&amp;shy;ence that just works is al&amp;shy;so very handy as you don’t
+waste your time spell&amp;shy;ing out ev&amp;shy;ery lit&amp;shy;tle de&amp;shy;tail for the com&amp;shy;pil&amp;shy;er (just aut&amp;shy;ofill
+the in&amp;shy;ferred type!). Some&amp;shy;times, the com&amp;shy;pil&amp;shy;er will tell you that your func&amp;shy;tion
+is ac&amp;shy;tu&amp;shy;al&amp;shy;ly more gen&amp;shy;er&amp;shy;al than you thought it was. Free the&amp;shy;o&amp;shy;rems, any&amp;shy;one?&lt;/p&gt;
+&lt;p&gt;Us&amp;shy;ing op&amp;shy;er&amp;shy;a&amp;shy;tors for com&amp;shy;mon op&amp;shy;er&amp;shy;a&amp;shy;tions proves to be handy here. I find that it
+is eas&amp;shy;i&amp;shy;er to do pat&amp;shy;tern recog&amp;shy;ni&amp;shy;tion and rewrit&amp;shy;ing when you’ve got a mix&amp;shy;ture of
+op&amp;shy;er&amp;shy;a&amp;shy;tors and iden&amp;shy;ti&amp;shy;fiers, rather than just lots of let&amp;shy;ters and func&amp;shy;tion
+ap&amp;shy;pli&amp;shy;ca&amp;shy;tion brack&amp;shy;ets.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="honour-thy-compiler-contributors"&gt;
+&lt;h2&gt;Honour thy compiler contributors.&lt;/h2&gt;
+&lt;p&gt;There have been sev&amp;shy;er&amp;shy;al oc&amp;shy;ca&amp;shy;sions over the past few months where ei&amp;shy;ther I or
+one of my team-mates en&amp;shy;coun&amp;shy;tered a “huh, I didn’t re&amp;shy;alise you could do that,
+that’s so cool!” mo&amp;shy;ment. That is prob&amp;shy;a&amp;shy;bly not what makes Haskell unique in my
+opin&amp;shy;ion. What &lt;em&gt;does&lt;/em&gt; make it stand it out is that I’m fair&amp;shy;ly con&amp;shy;fi&amp;shy;dent that
+I’ll reg&amp;shy;u&amp;shy;lar&amp;shy;ly keep hav&amp;shy;ing that “aha!” mo&amp;shy;ment even I keep writ&amp;shy;ing Haskell for
+the next few years. It might be com&amp;shy;ing from blog posts/pa&amp;shy;pers/navel-gaz&amp;shy;ing
+posts on r/haskell or some&amp;shy;where else, but there’s al&amp;shy;ways go&amp;shy;ing to be
+in&amp;shy;ter&amp;shy;est&amp;shy;ing stuff to learn.&lt;/p&gt;
+&lt;p&gt;As Strous&amp;shy;trup once said, “There are on&amp;shy;ly two kinds of lan&amp;shy;guages: the ones
+peo&amp;shy;ple com&amp;shy;plain about and the ones no&amp;shy;body us&amp;shy;es”. I’ve prob&amp;shy;a&amp;shy;bly made more than my
+fair share of com&amp;shy;plaints here, but I must say that I’m very grate&amp;shy;ful to all the
+peo&amp;shy;ple who have con&amp;shy;trib&amp;shy;uted to GHC and the Haskell ecosys&amp;shy;tem more gen&amp;shy;er&amp;shy;al&amp;shy;ly.
+Over&amp;shy;all, Haskell most&amp;shy;ly feels like an awe&amp;shy;some, co&amp;shy;he&amp;shy;sive whole.
+Thank you! :D&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="closing-thoughts"&gt;
+&lt;h2&gt;Closing thoughts&lt;/h2&gt;
+&lt;p&gt;Writ&amp;shy;ing a com&amp;shy;pil&amp;shy;er in Haskell has been a great source of joy. 9/10 would rec&amp;shy;om&amp;shy;mend.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id="bonus"&gt;
+&lt;h2&gt;Bonus&lt;/h2&gt;
+&lt;p&gt;One of my big&amp;shy;gest (ノಠ益ಠ)ノ彡┻━┻ mo&amp;shy;ments over the past few months -
+&lt;a href="https://ghc.haskell.org/trac/ghc/ticket/8695"&gt;Trac 8695&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Al&amp;shy;so, I couldn’t fig&amp;shy;ure out how to fit &lt;code&gt;intero&lt;/code&gt;, &lt;code&gt;hoogle&lt;/code&gt; and &lt;code&gt;hlint&lt;/code&gt; in&amp;shy;to
+the nar&amp;shy;ra&amp;shy;tive here but all of them de&amp;shy;serve a shout-out.
+&lt;code&gt;intero&lt;/code&gt; does its best to pro&amp;shy;vide live type in&amp;shy;for&amp;shy;ma&amp;shy;tion in Spacemacs (un&amp;shy;til
+some TH heavy code kills its per&amp;shy;for&amp;shy;mance).
+&lt;code&gt;hoogle&lt;/code&gt; is google but for Haskell, search&amp;shy;ing type sig&amp;shy;na&amp;shy;tures is a breeze.
+&lt;code&gt;hlint&lt;/code&gt; does sim&amp;shy;ple equa&amp;shy;tion&amp;shy;al rea&amp;shy;son&amp;shy;ing and pro&amp;shy;vide many help&amp;shy;ful sug&amp;shy;ges&amp;shy;tions
+for clear&amp;shy;er code. All these tools are awe&amp;shy;some! (&lt;a class="footnote-reference brackets" href="#id9" id="id4"&gt;5&lt;/a&gt;)&lt;/p&gt;
+&lt;section id="footnotes"&gt;
+&lt;h3&gt;Footnotes&lt;/h3&gt;
+&lt;dl class="footnote brackets"&gt;
+&lt;dt class="label" id="id5"&gt;&lt;span class="brackets"&gt;&lt;a class="fn-backref" href="#id1"&gt;1&lt;/a&gt;&lt;/span&gt;&lt;/dt&gt;
+&lt;dd&gt;Here “com&amp;shy;pose” refers to the fact that you can mix and match stuff, not lit&amp;shy;er&amp;shy;al func&amp;shy;tion
+com&amp;shy;po&amp;shy;si&amp;shy;tion, al&amp;shy;though I guess you could do the lat&amp;shy;ter too.&lt;/dd&gt;
+&lt;dt class="label" id="id6"&gt;&lt;span class="brackets"&gt;&lt;a class="fn-backref" href="#id2"&gt;2&lt;/a&gt;&lt;/span&gt;&lt;/dt&gt;
+&lt;dd&gt;Per&amp;shy;haps li&amp;shy;brary au&amp;shy;thors are tak&amp;shy;ing Wadler’s words a bit too se&amp;shy;ri&amp;shy;ous&amp;shy;ly?&lt;/dd&gt;
+&lt;dt class="label" id="id7"&gt;&lt;span class="brackets"&gt;&lt;a class="fn-backref" href="#id3"&gt;3&lt;/a&gt;&lt;/span&gt;&lt;/dt&gt;
+&lt;dd&gt;Not sure if I was imag&amp;shy;in&amp;shy;ing it but I rec&amp;shy;ol&amp;shy;lect my ter&amp;shy;mi&amp;shy;nal beep&amp;shy;ing when I was tran&amp;shy;si&amp;shy;tive&amp;shy;ly
+in&amp;shy;stalling &lt;code&gt;lens&lt;/code&gt; for the fifti&amp;shy;eth time.&lt;/dd&gt;
+&lt;dt class="label" id="id8"&gt;&lt;span class="brackets"&gt;4&lt;/span&gt;&lt;/dt&gt;
+&lt;dd&gt;&lt;p&gt;I’m not against sub&amp;shy;typ&amp;shy;ing/in&amp;shy;her&amp;shy;i&amp;shy;tance as a con&amp;shy;cept. In my lit&amp;shy;tle ex&amp;shy;pe&amp;shy;ri&amp;shy;ence, the prob&amp;shy;lem
+is that for high&amp;shy;er-lev&amp;shy;el prob&amp;shy;lems (code or&amp;shy;ga&amp;shy;ni&amp;shy;za&amp;shy;tion etc.) it is eas&amp;shy;i&amp;shy;er to slip in&amp;shy;to the trap
+of adding just a lit&amp;shy;tle bit of more of mu&amp;shy;ta&amp;shy;tion/state&amp;shy;ful&amp;shy;ness/in&amp;shy;tru&amp;shy;sive&amp;shy;ness etc.&lt;/p&gt;
+&lt;p&gt;Once you’ve done that, there is in&amp;shy;creased hes&amp;shy;is&amp;shy;tance in chang&amp;shy;ing large amounts of code as
+many in&amp;shy;vari&amp;shy;ants are not en&amp;shy;cod&amp;shy;ed in the type sys&amp;shy;tem but in com&amp;shy;ments or in lost mem&amp;shy;o&amp;shy;ries.
+Hav&amp;shy;ing read mul&amp;shy;ti&amp;shy;ple books geared to&amp;shy;wards OO pro&amp;shy;gram&amp;shy;mers re&amp;shy;gard&amp;shy;ing code hy&amp;shy;giene, best prac&amp;shy;tices,
+and de&amp;shy;sign pat&amp;shy;terns, I’ve found the giv&amp;shy;en ad&amp;shy;vice to be ei&amp;shy;ther triv&amp;shy;ial&amp;shy;ly ob&amp;shy;vi&amp;shy;ous, not re&amp;shy;al&amp;shy;ly
+mak&amp;shy;ing sense, or over&amp;shy;ly com&amp;shy;pli&amp;shy;cat&amp;shy;ed/time-con&amp;shy;sum&amp;shy;ing to en&amp;shy;force by hand.
+While these of&amp;shy;ten em&amp;shy;pha&amp;shy;size test&amp;shy;ing, which can cer&amp;shy;tain&amp;shy;ly com&amp;shy;ple&amp;shy;ment refac&amp;shy;tor&amp;shy;ing and give you
+more con&amp;shy;fi&amp;shy;dence that you’re main&amp;shy;tain&amp;shy;ing in&amp;shy;vari&amp;shy;ants cor&amp;shy;rect&amp;shy;ly, it can&amp;shy;not be a sub&amp;shy;sti&amp;shy;tute for
+hav&amp;shy;ing strong types – the cost of main&amp;shy;tain&amp;shy;ing that many tests is just too high.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt class="label" id="id9"&gt;&lt;span class="brackets"&gt;&lt;a class="fn-backref" href="#id4"&gt;5&lt;/a&gt;&lt;/span&gt;&lt;/dt&gt;
+&lt;dd&gt;I wish we (the Haskell com&amp;shy;mu&amp;shy;ni&amp;shy;ty) would spend more ef&amp;shy;fort in get&amp;shy;ting tool&amp;shy;ing in&amp;shy;to the hands
+of be&amp;shy;gin&amp;shy;ners right away, not just GH&amp;shy;Ci. It re&amp;shy;al&amp;shy;ly makes for a big qual&amp;shy;i&amp;shy;ty-of-life im&amp;shy;prove&amp;shy;ment.
+Users from oth&amp;shy;er lan&amp;shy;guages may not even re&amp;shy;al&amp;shy;ize that such tools could/do ex&amp;shy;ist, so they might
+not go seek them in the first place.&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/section&gt;
+&lt;/section&gt;
+</content><category term="haskell"></category><category term="compiler"></category></entry><entry><title>Language Zoo</title><link href="https://theindigamer.github.io/language-zoo.html" rel="alternate"></link><published>2017-12-05T00:00:00-05:00</published><updated>2017-12-05T00:00:00-05:00</updated><author><name>Varun Gandhi</name></author><id>tag:theindigamer.github.io,2017-12-05:/language-zoo.html</id><summary type="html">&lt;p&gt;Once up&amp;shy;on a time, the biobots sim&amp;shy;ply had stones and wood.
 They would com&amp;shy;mu&amp;shy;ni&amp;shy;cate most&amp;shy;ly by speech
 – in a va&amp;shy;ri&amp;shy;ety of lan&amp;shy;guages, if I may add, al&amp;shy;though we’re not re&amp;shy;al&amp;shy;ly in&amp;shy;ter&amp;shy;est&amp;shy;ed
 in these here …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Once up&amp;shy;on a time, the biobots sim&amp;shy;ply had stones and wood.
@@ -136,7 +388,7 @@ I mean an in&amp;shy;ter&amp;shy;pre&amp;shy;ta&amp;shy;tion where all the point
 ev&amp;shy;i&amp;shy;dence in the text/in the ap&amp;shy;pro&amp;shy;pri&amp;shy;ate his&amp;shy;tor&amp;shy;i&amp;shy;cal con&amp;shy;text of the text.&lt;/p&gt;
 &lt;p&gt;I have light&amp;shy;ly edit&amp;shy;ed the ar&amp;shy;ti&amp;shy;cle to avoid com&amp;shy;ing across as over&amp;shy;ly ar&amp;shy;ro&amp;shy;gant,
 the rest is as is.&lt;/p&gt;
-&lt;hr class="docutils" /&gt;
+&lt;hr /&gt;
 &lt;p&gt;To&amp;shy;day morn&amp;shy;ing, while brows&amp;shy;ing my Face&amp;shy;book feed, I bumped across an im&amp;shy;age
 shared via 9gag stat&amp;shy;ing a fan the&amp;shy;o&amp;shy;ry re&amp;shy;gard&amp;shy;ing Stu&amp;shy;dio Ghi&amp;shy;b&amp;shy;li’s &lt;em&gt;Spir&amp;shy;it&amp;shy;ed
 Away&lt;/em&gt; (2001). While the im&amp;shy;age I saw is lo&amp;shy;cat&amp;shy;ed
@@ -184,7 +436,7 @@ read&amp;shy;ing over any oth&amp;shy;er read&amp;shy;ing.&lt;/p&gt;
 &lt;p&gt;I am not go&amp;shy;ing to jus&amp;shy;ti&amp;shy;fy this point here. If you do not agree, then you might
 want to stop read&amp;shy;ing here.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Claim&lt;/strong&gt;: The fan the&amp;shy;o&amp;shy;ry above does not&lt;/p&gt;
-&lt;ol class="arabic simple"&gt;
+&lt;ol&gt;
 &lt;li&gt;rep&amp;shy;re&amp;shy;sent au&amp;shy;tho&amp;shy;ri&amp;shy;al in&amp;shy;tent, con&amp;shy;trary to the claim near the end.&lt;/li&gt;
 &lt;li&gt;is not con&amp;shy;sis&amp;shy;tent with the film un&amp;shy;less se&amp;shy;ri&amp;shy;ous cre&amp;shy;ative lib&amp;shy;er&amp;shy;ty is
 tak&amp;shy;en with in&amp;shy;ter&amp;shy;pre&amp;shy;ta&amp;shy;tion.&lt;/li&gt;
@@ -211,7 +463,7 @@ Then I did more read&amp;shy;ing. Dur&amp;shy;ing the Edo pe&amp;shy;ri&amp;shy;
 &lt;p&gt;First of all let’s see what “Edo pe&amp;shy;ri&amp;shy;od” means. Loose&amp;shy;ly speak&amp;shy;ing,
 Ja&amp;shy;pa&amp;shy;nese his&amp;shy;to&amp;shy;ry is di&amp;shy;vid&amp;shy;ed in&amp;shy;to pe&amp;shy;ri&amp;shy;ods based on rulers; the Edo pe&amp;shy;ri&amp;shy;od
 and the fol&amp;shy;low&amp;shy;ing pe&amp;shy;ri&amp;shy;ods are:&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;Edo pe&amp;shy;ri&amp;shy;od - 1603 to 1868&lt;/li&gt;
 &lt;li&gt;Mei&amp;shy;ji pe&amp;shy;ri&amp;shy;od - 1868 to 1912&lt;/li&gt;
 &lt;li&gt;Taishō pe&amp;shy;ri&amp;shy;od - 1912 to 1928&lt;/li&gt;
@@ -378,7 +630,7 @@ think they, too, have such a wish.&lt;/p&gt;
 re&amp;shy;main&amp;shy;ing ar&amp;shy;gu&amp;shy;ments sup&amp;shy;port part 2.&lt;/p&gt;
 &lt;section id="references"&gt;
 &lt;h2&gt;References&lt;/h2&gt;
-&lt;ol class="arabic simple"&gt;
+&lt;ol&gt;
 &lt;li&gt;Wikipedia - Sen&amp;shy;tō - Fu&amp;shy;ture&lt;/li&gt;
 &lt;li&gt;Google Books search - yu&amp;shy;na&amp;shy;furo&lt;/li&gt;
 &lt;li&gt;Rock&amp;shy;et News 24 - Japan’s top ba&amp;shy;by names for 2015: Will
@@ -673,7 +925,7 @@ be&amp;shy;low.&lt;/p&gt;
 &lt;/figure&gt;
 &lt;p&gt;Some oth&amp;shy;er things I found cool (al&amp;shy;though I con&amp;shy;cede some are re&amp;shy;lat&amp;shy;ed to
 the im&amp;shy;plic&amp;shy;it or&amp;shy;der&amp;shy;ing of op&amp;shy;er&amp;shy;a&amp;shy;tions &amp;#64;, +, -, *, /, % in my code):&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;The first num&amp;shy;ber to use di&amp;shy;vi&amp;shy;sion is 187 in [5,&amp;#64;,&amp;#64;,*,*,&amp;#64;,2,/,+]. Out
 of 12,000 paths, 899 use one or more di&amp;shy;vi&amp;shy;sion op&amp;shy;er&amp;shy;a&amp;shy;tions (there are
 910 di&amp;shy;vi&amp;shy;sions in to&amp;shy;tal).&lt;/li&gt;
@@ -872,7 +1124,7 @@ half-closed. The strange fig&amp;shy;ure at the door spoke with&amp;shy;out be&a
 &lt;p&gt;“Come in Ω. Would you like a baguette with some mar&amp;shy;malade?”&lt;/p&gt;
 &lt;p&gt;“Thank you.”&lt;/p&gt;
 &lt;p&gt;“Oh, I haven’t even be&amp;shy;gun yet.”&lt;/p&gt;
-</content><category term="math"></category><category term="ordinals"></category></entry><entry><title>Alice’s Adventures with Project Euler</title><link href="https://theindigamer.github.io/alices-adventures-with-project-euler.html" rel="alternate"></link><published>2016-05-31T00:00:00-05:00</published><updated>2016-05-31T00:00:00-05:00</updated><author><name>Varun Gandhi</name></author><id>tag:theindigamer.github.io,2016-05-31:/alices-adventures-with-project-euler.html</id><summary type="html">&lt;p&gt;Af&amp;shy;ter her ad&amp;shy;ven&amp;shy;tures in the strange and es&amp;shy;o&amp;shy;ter&amp;shy;ic Won&amp;shy;der&amp;shy;land, Al&amp;shy;ice
+</content><category term="math"></category><category term="ordinals"></category></entry><entry><title>Alice's Adventures with Project Euler</title><link href="https://theindigamer.github.io/alices-adventures-with-project-euler.html" rel="alternate"></link><published>2016-05-31T00:00:00-05:00</published><updated>2016-05-31T00:00:00-05:00</updated><author><name>Varun Gandhi</name></author><id>tag:theindigamer.github.io,2016-05-31:/alices-adventures-with-project-euler.html</id><summary type="html">&lt;p&gt;Af&amp;shy;ter her ad&amp;shy;ven&amp;shy;tures in the strange and es&amp;shy;o&amp;shy;ter&amp;shy;ic Won&amp;shy;der&amp;shy;land, Al&amp;shy;ice
 was in a bad mood. She re&amp;shy;fused to ven&amp;shy;ture out&amp;shy;side, lest she fall in&amp;shy;to a
 rab&amp;shy;bit hole again. In&amp;shy;stead, she would sit in front of the com&amp;shy;put&amp;shy;er all day,
 read&amp;shy;ing all there was to read on the in&amp;shy;ter&amp;shy;net. One of her favourite pas&amp;shy;times
@@ -938,7 +1190,7 @@ re&amp;shy;al&amp;shy;ized that this is too much for you. Un&amp;shy;for&amp;shy
 there are so many fun pro&amp;shy;gram&amp;shy;ming lan&amp;shy;guages out there, it is hard to
 rec&amp;shy;om&amp;shy;mend just one. So I’ve se&amp;shy;lect&amp;shy;ed three (amongst the many I know
 :P) that you’ll prob&amp;shy;a&amp;shy;bly en&amp;shy;joy. In no par&amp;shy;tic&amp;shy;u&amp;shy;lar or&amp;shy;der,&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;Haskell: Per&amp;shy;fect for bud&amp;shy;ding math&amp;shy;e&amp;shy;ma&amp;shy;ti&amp;shy;cians. I know you’ll love
 it.&lt;/li&gt;
 &lt;li&gt;Python: You might want to start with this for a gen&amp;shy;tle
@@ -1095,10 +1347,10 @@ rel&amp;shy;a&amp;shy;tive&amp;shy;ly prime to n. For ex&amp;shy;am&amp;shy;ple,
 less than nine and rel&amp;shy;a&amp;shy;tive&amp;shy;ly prime to nine, φ(9)=6.&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
-&lt;tr&gt;&lt;th class="head"&gt;n&lt;/th&gt;
-&lt;th class="head"&gt;Rel&amp;shy;a&amp;shy;tive&amp;shy;ly Prime&lt;/th&gt;
-&lt;th class="head"&gt;φ(n)&lt;/th&gt;
-&lt;th class="head"&gt;n/φ(n)&lt;/th&gt;
+&lt;tr&gt;&lt;th&gt;n&lt;/th&gt;
+&lt;th&gt;Rel&amp;shy;a&amp;shy;tive&amp;shy;ly Prime&lt;/th&gt;
+&lt;th&gt;φ(n)&lt;/th&gt;
+&lt;th&gt;n/φ(n)&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
@@ -1248,7 +1500,7 @@ usu&amp;shy;al &lt;code&gt;for a in b&lt;/code&gt; syn&amp;shy;tax al&amp;shy;so
 &lt;p&gt;Let S(A) rep&amp;shy;re&amp;shy;sent the sum of el&amp;shy;e&amp;shy;ments in set A of size n. We shall
 call it a spe&amp;shy;cial sum set if for any two non-emp&amp;shy;ty dis&amp;shy;joint sub&amp;shy;sets,
 B and C, the fol&amp;shy;low&amp;shy;ing prop&amp;shy;er&amp;shy;ties are true:&lt;/p&gt;
-&lt;ol class="arabic simple"&gt;
+&lt;ol&gt;
 &lt;li&gt;S(B) ≠ S(C); that is, sums of sub&amp;shy;sets can&amp;shy;not be equal.&lt;/li&gt;
 &lt;li&gt;If B con&amp;shy;tains more el&amp;shy;e&amp;shy;ments than C then S(B) &amp;gt; S(C).&lt;/li&gt;
 &lt;/ol&gt;
@@ -1485,7 +1737,7 @@ the fol&amp;shy;low&amp;shy;ing let&amp;shy;ter to Bob:&lt;/p&gt;
 &lt;p&gt;Bob,&lt;/p&gt;
 &lt;p&gt;You were right about all the pro&amp;shy;gram&amp;shy;ming lan&amp;shy;guages be&amp;shy;ing fun in
 their own way.&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;Haskell: This one is prob&amp;shy;a&amp;shy;bly my favourite as the no&amp;shy;ta&amp;shy;tion is
 very sim&amp;shy;i&amp;shy;lar to math and it ex&amp;shy;press&amp;shy;es in&amp;shy;tent very clear&amp;shy;ly,
 es&amp;shy;pe&amp;shy;cial&amp;shy;ly since you don’t have mu&amp;shy;ta&amp;shy;tion. Once I fig&amp;shy;ured out the
@@ -1515,7 +1767,7 @@ touched the prover&amp;shy;bial tip of the ice&amp;shy;berg here, es&amp;shy;pe&
 were pri&amp;shy;mar&amp;shy;i&amp;shy;ly con&amp;shy;cerned with solv&amp;shy;ing math prob&amp;shy;lems. For a work&amp;shy;ing
 pro&amp;shy;gram&amp;shy;mer, there are many more use&amp;shy;ful fea&amp;shy;tures that these lan&amp;shy;guages
 pro&amp;shy;vide than those you’ve just seen:&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;Haskell:
 &lt;a href="https://en.wikipedia.org/wiki/Purely_functional"&gt;Pu&amp;shy;ri&amp;shy;ty&lt;/a&gt;
 makes de&amp;shy;bug&amp;shy;ging much eas&amp;shy;i&amp;shy;er. Best of all, there is
@@ -1545,7 +1797,7 @@ friend&amp;shy;ly to be&amp;shy;gin&amp;shy;ners. Check them out on
 &lt;/blockquote&gt;
 &lt;p&gt;As Al&amp;shy;ice stepped off her com&amp;shy;put&amp;shy;er af&amp;shy;ter read&amp;shy;ing Bob’s email, she
 re&amp;shy;alised that she hadn’t even start&amp;shy;ed work&amp;shy;ing on the project.&lt;/p&gt;
-&lt;hr class="docutils" /&gt;
+&lt;hr /&gt;
 &lt;p&gt;P.S. At the time of writ&amp;shy;ing, the Rust syn&amp;shy;tax high&amp;shy;light&amp;shy;ing is not
 per&amp;shy;fect. This is an is&amp;shy;sue with the syn&amp;shy;tax high&amp;shy;lighter that Github Pages
 us&amp;shy;es: Rouge. See the
@@ -1572,7 +1824,7 @@ grain of salt. I have based it on the stuff I’ve read and done, but
 YM&amp;shy;MV.&lt;/p&gt;
 &lt;section id="additional-resources-if-you-re-tired-of-my-writing-already"&gt;
 &lt;h3&gt;Additional resources (if you’re tired of my writing already)&lt;/h3&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;`Acad.SE &amp;lt;https://academia.stack&amp;shy;ex&amp;shy;change.com&amp;gt;`__&lt;/strong&gt; - There are
 al&amp;shy;ready a large num&amp;shy;ber of ques&amp;shy;tions about grad&amp;shy;u&amp;shy;ate ad&amp;shy;mis&amp;shy;sions that
 have been an&amp;shy;swered by aca&amp;shy;demics. If you are fa&amp;shy;mil&amp;shy;iar with
@@ -1612,7 +1864,7 @@ oth&amp;shy;er ap&amp;shy;pli&amp;shy;cants in the fo&amp;shy;rums.&lt;/li&gt;
 &lt;p&gt;(M.S. ap&amp;shy;pli&amp;shy;cants can skip over this sec&amp;shy;tion.)&lt;/p&gt;
 &lt;p&gt;Do you re&amp;shy;al&amp;shy;ly want to? Do you re&amp;shy;al&amp;shy;ly, re&amp;shy;al&amp;shy;ly want to? Do your rea&amp;shy;sons
 lie amongst the fol&amp;shy;low&amp;shy;ing:&lt;/p&gt;
-&lt;ol class="arabic simple"&gt;
+&lt;ol&gt;
 &lt;li&gt;You can’t find a job.&lt;/li&gt;
 &lt;li&gt;You dream of lots of mon&amp;shy;ey or fame or pres&amp;shy;tige.&lt;/li&gt;
 &lt;li&gt;You just want to help peo&amp;shy;ple/do good in the world.&lt;/li&gt;
@@ -1631,7 +1883,7 @@ en&amp;shy;tire ar&amp;shy;ti&amp;shy;cle.&lt;/p&gt;
 &lt;/section&gt;
 &lt;section id="stuff-you-ll-need"&gt;
 &lt;h2&gt;Stuff you’ll need&lt;/h2&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;A friend in deed&lt;/strong&gt; - You can pro&amp;shy;vide help each oth&amp;shy;er in mul&amp;shy;ti&amp;shy;ple
 ways: proof-read&amp;shy;ing and giv&amp;shy;ing feed&amp;shy;back on SOPs, study&amp;shy;ing to&amp;shy;geth&amp;shy;er
 for tests, scout&amp;shy;ing for uni&amp;shy;ver&amp;shy;si&amp;shy;ties etc.&lt;/li&gt;
@@ -1665,7 +1917,7 @@ you should check with the uni&amp;shy;ver&amp;shy;si&amp;shy;ty that you will be
 Fin&amp;shy;ish&amp;shy;ing scout&amp;shy;ing ear&amp;shy;ly is cru&amp;shy;cial; oth&amp;shy;er&amp;shy;wise you might miss out on
 some uni&amp;shy;ver&amp;shy;si&amp;shy;ties which have ear&amp;shy;ly dead&amp;shy;lines around 1 De&amp;shy;cem&amp;shy;ber.&lt;/p&gt;
 &lt;p&gt;(Wn ≡ end of nth week)&lt;/p&gt;
-&lt;ol class="arabic simple"&gt;
+&lt;ol&gt;
 &lt;li&gt;Jul W0 - Sep W4 ~ Oct W1: Scout&amp;shy;ing, pre&amp;shy;par&amp;shy;ing for stan&amp;shy;dard&amp;shy;ized tests.&lt;/li&gt;
 &lt;li&gt;Sep W2 - Nov W1 ~ Nov W4: Com&amp;shy;plete stan&amp;shy;dard&amp;shy;ized tests.&lt;/li&gt;
 &lt;li&gt;Oct W0 - Nov W4 ~ Dec W2: Fill&amp;shy;ing ap&amp;shy;pli&amp;shy;ca&amp;shy;tions (dead&amp;shy;lines: Nov W4,
@@ -1689,7 +1941,7 @@ of po&amp;shy;ten&amp;shy;tial 50~100 uni&amp;shy;ver&amp;shy;si&amp;shy;ties. T
 larg&amp;shy;er num&amp;shy;ber of uni&amp;shy;ver&amp;shy;si&amp;shy;ties are your time, san&amp;shy;i&amp;shy;ty and mon&amp;shy;ey (not
 nec&amp;shy;es&amp;shy;sar&amp;shy;i&amp;shy;ly in that or&amp;shy;der). If you are ap&amp;shy;ply&amp;shy;ing to say 8 uni&amp;shy;ver&amp;shy;si&amp;shy;ties,
 then I would sug&amp;shy;gest the fol&amp;shy;low&amp;shy;ing break-down:&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;2/3 top schools - You feel that you have a low chance of be&amp;shy;ing
 se&amp;shy;lect&amp;shy;ed be&amp;shy;cause your cre&amp;shy;den&amp;shy;tials seem weak&amp;shy;er com&amp;shy;pared to past years’
 ad&amp;shy;mits.&lt;/li&gt;
@@ -1710,7 +1962,7 @@ change be&amp;shy;tween get&amp;shy;ting ad&amp;shy;mit&amp;shy;ted and ac&amp;s
 &lt;p&gt;Apart from per&amp;shy;son&amp;shy;al pref&amp;shy;er&amp;shy;ences, you should con&amp;shy;sid&amp;shy;er the fol&amp;shy;low&amp;shy;ing
 fac&amp;shy;tors (PI = &lt;a href="https://en.wikipedia.org/wiki/Principal_investigator"&gt;Prin&amp;shy;ci&amp;shy;pal
 In&amp;shy;ves&amp;shy;ti&amp;shy;ga&amp;shy;tor&lt;/a&gt;):&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;Match of re&amp;shy;search in&amp;shy;ter&amp;shy;ests (PI) - You &lt;em&gt;must&lt;/em&gt; read pa&amp;shy;pers here. The
 in&amp;shy;tro&amp;shy;duc&amp;shy;to&amp;shy;ry in&amp;shy;for&amp;shy;ma&amp;shy;tion giv&amp;shy;en on pro&amp;shy;fes&amp;shy;sors’ web&amp;shy;pages should on&amp;shy;ly be
 used as a pre-fil&amp;shy;ter.&lt;/li&gt;
@@ -1902,7 +2154,7 @@ test and once for the Sub&amp;shy;ject test.&lt;/p&gt;
 &lt;h2&gt;Multiple dispatch&lt;/h2&gt;
 &lt;p&gt;The time has fi&amp;shy;nal&amp;shy;ly come where you have to ac&amp;shy;tu&amp;shy;al&amp;shy;ly start fill&amp;shy;ing your
 ap&amp;shy;pli&amp;shy;ca&amp;shy;tions and send&amp;shy;ing them. The most com&amp;shy;mon doc&amp;shy;u&amp;shy;ments need&amp;shy;ed are:&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;On&amp;shy;line ap&amp;shy;pli&amp;shy;ca&amp;shy;tion - This should be fair&amp;shy;ly straight-for&amp;shy;ward to fill.
 Some uni&amp;shy;ver&amp;shy;si&amp;shy;ties might re&amp;shy;quire you to give ref&amp;shy;er&amp;shy;ences for text&amp;shy;books
 used in your un&amp;shy;der&amp;shy;grad&amp;shy;u&amp;shy;ate cour&amp;shy;ses. It is im&amp;shy;por&amp;shy;tant to con&amp;shy;tact the
@@ -1987,7 +2239,7 @@ switch back to wait&amp;shy;ing mode for bet&amp;shy;ter de&amp;shy;ci&amp;shy;s
 &lt;h3&gt;(Edge case) Interview shenanigans&lt;/h3&gt;
 &lt;p&gt;Some uni&amp;shy;ver&amp;shy;si&amp;shy;ties have an in&amp;shy;ter&amp;shy;view as a fi&amp;shy;nal part of the ad&amp;shy;mis&amp;shy;sion
 process.&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;Vis&amp;shy;it: The in&amp;shy;ter&amp;shy;view will be held at the uni&amp;shy;ver&amp;shy;si&amp;shy;ty and will al&amp;shy;so act
 as an open house ses&amp;shy;sion where you can talk to grad stu&amp;shy;dents and
 dif&amp;shy;fer&amp;shy;ent PIs. See the open house vis&amp;shy;its tips be&amp;shy;low for more de&amp;shy;tails.
@@ -2007,7 +2259,7 @@ Plan B if need&amp;shy;ed.&lt;/li&gt;
 suf&amp;shy;fi&amp;shy;cient&amp;shy;ly com&amp;shy;plex pri&amp;shy;or&amp;shy;i&amp;shy;ty tree (un&amp;shy;like or&amp;shy;di&amp;shy;nary peo&amp;shy;ple with their
 sil&amp;shy;ly lines, pfft), you now have to de&amp;shy;cide be&amp;shy;tween the ad&amp;shy;mis&amp;shy;sion of&amp;shy;fers
 based on some sub&amp;shy;set of the fol&amp;shy;low&amp;shy;ing fac&amp;shy;tors:&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Pri&amp;shy;or&amp;shy;i&amp;shy;ty tree&lt;/strong&gt; - If cor&amp;shy;rect&amp;shy;ly made, this &lt;em&gt;should&lt;/em&gt; ac&amp;shy;count for all
 your &lt;em&gt;a pri&amp;shy;ori&lt;/em&gt; knowl&amp;shy;edge.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Fund&amp;shy;ing&lt;/strong&gt; - The on&amp;shy;ly trou&amp;shy;ble&amp;shy;some choice here is “no fund&amp;shy;ing + good
@@ -2047,7 +2299,7 @@ com&amp;shy;pared to most coun&amp;shy;tries. If you are from de&amp;shy;vel&amp
 In&amp;shy;dia, al&amp;shy;most ev&amp;shy;ery&amp;shy;thing will be more ex&amp;shy;pen&amp;shy;sive in the US :P. Con&amp;shy;sid&amp;shy;er
 get&amp;shy;ting (do&amp;shy;ing) the fol&amp;shy;low&amp;shy;ing things (tasks) be&amp;shy;fore leav&amp;shy;ing to save some
 mon&amp;shy;ey:&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;Text&amp;shy;books - These are usu&amp;shy;al&amp;shy;ly atro&amp;shy;cious&amp;shy;ly ex&amp;shy;pen&amp;shy;sive in the US,
 es&amp;shy;pe&amp;shy;cial&amp;shy;ly com&amp;shy;pared to In&amp;shy;di&amp;shy;an prices.&lt;/li&gt;
 &lt;li&gt;Manda&amp;shy;to&amp;shy;ry vac&amp;shy;cines - Check with your uni&amp;shy;ver&amp;shy;si&amp;shy;ty’s in&amp;shy;ter&amp;shy;na&amp;shy;tion&amp;shy;al
@@ -2078,7 +2330,7 @@ of their aca&amp;shy;dem&amp;shy;ic ca&amp;shy;reers.&lt;/p&gt;
 &lt;/section&gt;
 </content></entry><entry><title>Migration from Wordpress</title><link href="https://theindigamer.github.io/migration-from-wordpress.html" rel="alternate"></link><published>2016-04-02T00:00:00-05:00</published><updated>2016-04-02T00:00:00-05:00</updated><author><name>Varun Gandhi</name></author><id>tag:theindigamer.github.io,2016-04-02:/migration-from-wordpress.html</id><summary type="html"></summary><content type="html">&lt;p&gt;&lt;strong&gt;Why have I mi&amp;shy;grat&amp;shy;ed?&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;There are many rea&amp;shy;sons. In no par&amp;shy;tic&amp;shy;u&amp;shy;lar or&amp;shy;der,&lt;/p&gt;
-&lt;ul class="simple"&gt;
+&lt;ul&gt;
 &lt;li&gt;I’ve re&amp;shy;cent&amp;shy;ly no&amp;shy;ticed that I have very lit&amp;shy;tle tol&amp;shy;er&amp;shy;ance for slow&amp;shy;ly
 load&amp;shy;ing web&amp;shy;pages. Us&amp;shy;ing a stat&amp;shy;i&amp;shy;cal&amp;shy;ly gen&amp;shy;er&amp;shy;at&amp;shy;ed site with ze&amp;shy;ro
 Javascript means that my blog will load fast.&lt;/li&gt;

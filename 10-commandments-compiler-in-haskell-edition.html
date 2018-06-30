@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8" />
+  <title>10 Commandments (Compiler in Haskell edition) | Nocturne in Prose and Code</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,400i,600%7CSource+Sans+Pro:400,400i,600,600i&amp;amp;subset=latin-ext" />
+  <link rel="stylesheet" href="https://theindigamer.github.io/static/m-dark.css" />
+  <link rel="canonical" href="https://theindigamer.github.io/10-commandments-compiler-in-haskell-edition.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta property="og:site_name" content="Nocturne in Prose and Code" />
+  <meta property="og:title" content="10 Commandments (Compiler in Haskell edition)" />
+  <meta name="twitter:title" content="10 Commandments (Compiler in Haskell edition)" />
+  <meta property="og:url" content="https://theindigamer.github.io/10-commandments-compiler-in-haskell-edition.html" />
+  <meta property="og:description" content="During the spring semester of 2018, I took a basic compilers course – our team chose to write the compiler in Haskell. This is a chronicle/post-mortem/random hodgepodge of my thoughts." />
+  <meta name="twitter:description" content="During the spring semester of 2018, I took a basic compilers course – our team chose to write the compiler in Haskell. This is a chronicle/post-mortem/random hodgepodge of my thoughts." />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:type" content="article" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="https://theindigamer.github.io/" id="m-navbar-brand" class="m-col-t-9 m-col-m-none m-left-m">Nocturne in Prose and Code</a>
+      <a id="m-navbar-show" href="#navigation" title="Show navigation" class="m-col-t-3 m-hide-m m-text-right"></a>
+      <a id="m-navbar-hide" href="#" title="Hide navigation" class="m-col-t-3 m-hide-m m-text-right"></a>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-12 m-col-m-none">
+            <li><a href="https://theindigamer.github.io/pages/about.html">About?</a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main>
+<div class="m-container">
+  <div class="m-row">
+    <article class="m-col-m-10 m-nopadb">
+      <header>
+        <h1><a href="https://theindigamer.github.io/10-commandments-compiler-in-haskell-edition.html" rel="bookmark" title="Permalink to 10 Commandments (Compiler in Haskell edition)">
+          <time class="m-date" datetime="2018-06-30T00:00:00-05:00">
+            Jun <span class="m-date-day">30</span> 2018
+          </time>
+          10 Commandments (Compiler in Haskell edition)
+        </a></h1>
+        <p>Dur&shy;ing the spring se&shy;mes&shy;ter of 2018, I took a ba&shy;sic com&shy;pil&shy;ers course
+        – our team chose to write the com&shy;pil&shy;er in Haskell. This is a chron&shy;i&shy;cle/post-mortem/ran&shy;dom
+        hodge&shy;podge of my thoughts.</p>
+      </header>
+      <div class="m-clearfix-l"></div>
+<!-- content -->
+<section id="i-am-the-lambda-thy-god-which-have-brought-thee-out-of-the-land-of-oo-out-of-the-house-of-bondage">
+<h2>I am the Lambda thy God, which have brought thee out of the land of OO, out of the house of bondage.</h2>
+<blockquote>
+<p>A func&shy;tion&shy;al lan&shy;guage is a do&shy;main-spe&shy;cif&shy;ic lan&shy;guage for cre&shy;at&shy;ing do&shy;main-spe&shy;cif&shy;ic lan&shy;guages.</p>
+<p class="attribution">—Lamb&shy;daMan (a.k.a. Philip Wadler)</p>
+</blockquote>
+<ol>
+<li>Fact: ADTs and ASTs are like peanut but&shy;ter and jel&shy;ly, un&shy;less you’re al&shy;ler&shy;gic to func&shy;tion&shy;al
+pro&shy;gram&shy;ming, in which case, please ac&shy;cept my con&shy;do&shy;lences.</li>
+<li>Fact: Pat&shy;tern match&shy;ing is just nerd&shy;speak for awe&shy;some&shy;ness.</li>
+<li>Fact: Func&shy;tion&shy;al pro&shy;gram&shy;ming is ba&shy;si&shy;cal&shy;ly tetris but with a wider range of side ef&shy;fects al&shy;lowed.</li>
+<li>Fact: If it type checks, it must be cor&shy;rect.</li>
+<li>Fact: Paren&shy;the&shy;ses are evil (ob&shy;vi&shy;ous&shy;ly).</li>
+</ol>
+<p>Hope&shy;ful&shy;ly, our team’s choice of us&shy;ing Haskell for the com&shy;pil&shy;er is clear&shy;er now.</p>
+</section>
+<section id="thou-shalt-have-no-other-gods-before-me">
+<h2>Thou shalt have no other gods before me.</h2>
+<p>Al&shy;most ev&shy;ery&shy;thing in Haskell re&shy;volves around func&shy;tions/ap&shy;pli&shy;ca&shy;tion. Con&shy;se&shy;quent&shy;ly,
+you can do a <em>lot</em> of things in a sim&shy;i&shy;lar way (bar&shy;ring the fact the Haskell isn’t
+de&shy;pen&shy;dent&shy;ly typed yet):</p>
+<ol>
+<li>Or&shy;di&shy;nary val&shy;ue-lev&shy;el func&shy;tions have types <code>a1 -&gt; a2</code>.</li>
+<li>(G)ADT val&shy;ue con&shy;struc&shy;tors can be ap&shy;plied and com&shy;posed like val&shy;ue-lev&shy;el func&shy;tions.</li>
+<li>Records fields can be used as val&shy;ue-lev&shy;el func&shy;tions for pro&shy;jec&shy;tion.
+(This is prob&shy;a&shy;bly a bad de&shy;fault, but hey, at least it is con&shy;sis&shy;tent!)</li>
+<li>Val&shy;ues can be grouped and passed around.</li>
+<li>Type fam&shy;i&shy;lies (type-lev&shy;el func&shy;tions) have <em>kinds</em> <code>k1 -&gt; k2</code>.</li>
+<li>Type con&shy;struc&shy;tors can be ap&shy;plied and com&shy;posed like type-lev&shy;el func&shy;tions (<a class="footnote-reference brackets" href="#id5" id="id1">1</a>).
+They can al&shy;so be ab&shy;stract&shy;ed over.</li>
+<li>Type class&shy;es can be used as type lev&shy;el func&shy;tions (via <code>ConstraintKinds</code>).</li>
+<li>Con&shy;straints can be grouped and passed around.</li>
+<li>Adding a small amount of prim&shy;i&shy;tives gives you <code>Q</code> where you
+can ma&shy;nip&shy;u&shy;late Haskell code us&shy;ing (you guessed it) the usu&shy;al pat&shy;tern match&shy;ing,
+func&shy;tions, types and type class&shy;es.</li>
+</ol>
+</section>
+<section id="thou-shalt-not-take-the-name-of-the-lambda-thy-god-in-vain">
+<h2>Thou shalt not take the name of the Lambda thy God in vain.</h2>
+<p>(Au&shy;thor’s note: a more ap&shy;pro&shy;pri&shy;ate sub&shy;ti&shy;tle would be “Thou shalt be smug about
+hav&shy;ing high&shy;er-rank poly&shy;mor&shy;phism” but I didn’t want to ru&shy;in the theme. 😐)</p>
+<p>It’s not of&shy;ten that I think to my&shy;self, “this can&shy;not pos&shy;si&shy;bly work as ad&shy;ver&shy;tised”.
+Well, you can imag&shy;ine my amaze&shy;ment when I learned about SYB and lens&shy;es.
+I still don’t ful&shy;ly un&shy;der&shy;stand how ei&shy;ther of them work (or for that mat&shy;ter, the
+sig&shy;na&shy;tures in <code>Data.Data</code>) but that’s ok. Nat&shy;u&shy;ral&shy;ly, when both of these
+do a fu&shy;sion dance, you get fire&shy;works:</p>
+<pre>Data.Data.Lens.template :: forall s a. (Data s, Typeable a) =&gt; Traversal' s a</pre>
+<p>Yup, you read that right. Just slap some <code>deriving (Typeable, Data)</code> on your
+AST nodes and you get to tra&shy;verse stuff in a very flex&shy;i&shy;ble way by just
+spec&shy;i&shy;fy&shy;ing the types of the things you want. <a href="https://i.imgur.com/lBYwEDm.gif">Wow.</a></p>
+<p>Steal&shy;ing from the pa&shy;per <em>Prac&shy;ti&shy;cal type in&shy;fer&shy;ence for ar&shy;bi&shy;trary-rank types</em>:</p>
+<blockquote>
+[..] high&shy;er-rank types are def&shy;i&shy;nite&shy;ly use&shy;ful, oc&shy;ca&shy;sion&shy;al&shy;ly in&shy;dis&shy;pens&shy;able, and
+much eas&shy;i&shy;er to im&shy;ple&shy;ment than one might guess. Ev&shy;ery lan&shy;guage should have them!</blockquote>
+</section>
+<section id="thou-shalt-not-make-unto-thee-any-gratuitous-punctuation">
+<h2>Thou shalt not make unto thee any gratuitous punctuation.</h2>
+<p>Af&shy;ter us&shy;ing Haskell, near&shy;ly all oth&shy;er main&shy;stream lan&shy;guages seem over&shy;ly
+rid&shy;dled with punc&shy;tu&shy;a&shy;tion. While I’m guess&shy;ing white&shy;space sen&shy;si&shy;tiv&shy;i&shy;ty must
+be an&shy;noy&shy;ing for peo&shy;ple writ&shy;ing tool&shy;ing, it does aid read&shy;abil&shy;i&shy;ty a
+lot.</p>
+<p>Case in point - I’ve been writ&shy;ing some C++ late&shy;ly, which in case you don’t
+know, is a lan&shy;guage best de&shy;scribed as spicy punc&shy;tu&shy;a&shy;tion cur&shy;ry (not the fun kind
+of cur&shy;ry) plus some al&shy;phanu&shy;mer&shy;ic sea&shy;son&shy;ing sprin&shy;kled on top. I’ve been get&shy;ting a
+few miss&shy;ing “;” er&shy;rors over the past month, and I haven’t reached the point
+where I stop telling the com&shy;pil&shy;er “aww, fuck off, why don’t you in&shy;sert it your&shy;self”.</p>
+<p>Of course, this doesn’t mean that ev&shy;ery&shy;thing is per&shy;fect – some li&shy;braries
+de&shy;fine a lot of op&shy;er&shy;a&shy;tors (yes, we all know which one I’m talk&shy;ing about) and
+while in&shy;ter&shy;nal&shy;is&shy;ing the “log&shy;ic” be&shy;hind the sym&shy;bols can be help&shy;ful while
+writ&shy;ing code (<a class="footnote-reference brackets" href="#id6" id="id2">2</a>), read&shy;ing some&shy;one else’s code writ&shy;ten us&shy;ing them feels like
+read&shy;ing golfed code with&shy;out the irony.</p>
+</section>
+<section id="thou-shalt-not-unsafecoerce">
+<h2>Thou shalt not unsafeCoerce.</h2>
+<p>I re&shy;call read&shy;ing some&shy;where that ev&shy;ery time you use <code>unsafeCoerce</code>, a pup&shy;py dies.
+As much as it shames me to ad&shy;mit it, we killed two pup&shy;pies. RIP good boys.</p>
+</section>
+<section id="thou-shalt-not-over-abstract">
+<h2>Thou shalt not over-abstract.</h2>
+<blockquote>
+With great pow&shy;er come not-so-great type er&shy;rors/com&shy;pile times.</blockquote>
+<p>Us&shy;ing Haskell, it is very easy to get car&shy;ried away and use lots of fan&shy;cy
+ab&shy;strac&shy;tions with&shy;out (a) a clear-cut pow&shy;er-to-weight ra&shy;tio and (b) the abil&shy;i&shy;ty
+to dig your&shy;self out of a type-check&shy;ing er&shy;ror when need&shy;ed. Two cas&shy;es in point:</p>
+<ol>
+<li>We ini&shy;tial&shy;ly mod&shy;eled our AST as a pair of mu&shy;tu&shy;al&shy;ly re&shy;cur&shy;sive cofree comon&shy;ads
+– one for state&shy;ments and one for ex&shy;pres&shy;sions. At some point, we hit this strange
+type er&shy;ror which we couldn’t fig&shy;ure out how to work around (de&shy;spite be&shy;ing at it
+for a few hours). Even&shy;tu&shy;al&shy;ly we had to re&shy;write a large chunks of the code and
+get rid of it en&shy;tire&shy;ly. One of my team-mates did even&shy;tu&shy;al&shy;ly fig&shy;ure out
+how to get it to work about a week lat&shy;er (rough&shy;ly speak&shy;ing, my mem&shy;o&shy;ry is fuzzy).</li>
+<li><p>Our ap&shy;proach to unit-test&shy;ing in&shy;volved map&shy;ping all the AST an&shy;no&shy;ta&shy;tions to <code>()</code>,
+and check&shy;ing against the AST by hand. We al&shy;so had some oth&shy;er in&shy;vari&shy;ants, such
+as in&shy;te&shy;ger lit&shy;er&shy;als be&shy;ing rep&shy;re&shy;sent&shy;ed by <code>Integer</code> while pars&shy;ing and as <code>Int</code>
+af&shy;ter type&shy;check&shy;ing (the lan&shy;guage on&shy;ly sup&shy;port&shy;ed 64-bit val&shy;ues).
+While the Trees That Grow ap&shy;proach seemed per&shy;fect for en&shy;forc&shy;ing in&shy;vari&shy;ants
+stat&shy;i&shy;cal&shy;ly across com&shy;pil&shy;er phas&shy;es, it lead to (a) very long com&shy;pile times once
+we added in more in&shy;vari&shy;ants, as a large por&shy;tion of the com&shy;pil&shy;er’s mod&shy;ules
+tran&shy;si&shy;tive&shy;ly de&shy;pend&shy;ed on the AST mod&shy;ule, and (b) a lot of boil&shy;er&shy;plate for
+de&shy;riv&shy;ing in&shy;stances and re&shy;mov&shy;ing an&shy;no&shy;ta&shy;tions as we couldn’t just do
+<code>() &lt;$</code> (type fam&shy;i&shy;lies can&shy;not be par&shy;tial&shy;ly ap&shy;plied).</p>
+<p>In the end, this “fea&shy;ture” was nev&shy;er merged in&shy;to the mas&shy;ter branch.</p>
+</li>
+</ol>
+<p>Oh, I for&shy;got the men&shy;tion the best bit: we bat&shy;tled er&shy;ror mes&shy;sages with
+rigid skolems, in&shy;fi&shy;nite types, un&shy;touch&shy;able type vari&shy;ables, “sor&shy;ry, we don’t
+sup&shy;port im&shy;pred&shy;ica&shy;tive poly&shy;mor&shy;phism” (this one was my per&shy;son&shy;al favourite),
+what have you, and (to top it all off?) in&shy;fre&shy;quent/ran&shy;dom link&shy;er er&shy;rors on one
+guy’s ma&shy;chine. Brb af&shy;ter writ&shy;ing a pure link&shy;er.</p>
+</section>
+<section id="thou-shalt-not-take-performance-for-granted">
+<h2>Thou shalt not take performance for granted.</h2>
+<p>One of the ma&shy;jor road&shy;blocks in writ&shy;ing the com&shy;pil&shy;er was in get&shy;ting the graph-col&shy;or&shy;ing
+based reg&shy;is&shy;ter al&shy;lo&shy;ca&shy;tor (1) cor&shy;rect and (2) fast enough. While there isn’t much that
+could be done about (1), us&shy;ing <code>fgl</code> – one of the more pop&shy;u&shy;lar graph li&shy;braries –
+proved to be a bad choice. It isn’t clear whether we were us&shy;ing the li&shy;brary wrong or
+whether we had hit a fun&shy;da&shy;men&shy;tal lim&shy;i&shy;ta&shy;tion. Even&shy;tu&shy;al&shy;ly, we bor&shy;rowed ideas from GHC’s
+own im&shy;ple&shy;men&shy;ta&shy;tion to get the al&shy;lo&shy;ca&shy;tor to work in re&shy;spectable time.</p>
+<p>We had al&shy;so con&shy;sid&shy;ered us&shy;ing <code>alga</code> be&shy;fore we de&shy;cid&shy;ed against it be&shy;cause (1)
+it seemed to have few&shy;er helper func&shy;tions to work with and (2) the bench&shy;marks at
+the time didn’t give us enough con&shy;fi&shy;dence to try a new&shy;er li&shy;brary over an old&shy;er one.
+Hope&shy;ful&shy;ly, some&shy;one can use Lin&shy;ear Haskell to come up with a fast, gen&shy;er&shy;al-pur&shy;pose graph
+li&shy;brary 😅.</p>
+<p>Sim&shy;i&shy;lar&shy;ly, al&shy;though pars&shy;er com&shy;bi&shy;na&shy;tors prove to be very read&shy;able (as op&shy;posed to
+us&shy;ing a lex&shy;er/pars&shy;er gen&shy;er&shy;a&shy;tor), we once hit an is&shy;sue where 1/3rd of the com&shy;pi&shy;la&shy;tion
+time in the lex&shy;er (!). The prob&shy;lem was that we were care&shy;less&shy;ly us&shy;ing Mega&shy;parsec’s <cite>try</cite>
+in sev&shy;er&shy;al places, lead&shy;ing to a lot of un&shy;nec&shy;es&shy;sary back-track&shy;ing and failed at&shy;tempts.</p>
+<p>As I wrote ear&shy;li&shy;er, one prob&shy;lem with us&shy;ing fan&shy;cy ab&shy;strac&shy;tions is that it can get
+hard to rea&shy;son about per&shy;for&shy;mance. The <code>containers</code> li&shy;brary is prob&shy;a&shy;bly one of the
+best in this re&shy;gard, it clear&shy;ly out&shy;lines what one should ex&shy;pect from dif&shy;fer&shy;ent
+op&shy;er&shy;a&shy;tions, as well as pro&shy;vides a suf&shy;fi&shy;cient&shy;ly rich and con&shy;ve&shy;nient API to work in a
+pure&shy;ly func&shy;tion&shy;al set&shy;ting.</p>
+<p>P.S. The RTS made pro&shy;fil&shy;ing su&shy;per con&shy;ve&shy;nient here. We used GHC’s json dumps +
+<code>ghc-aeson-flamegraph</code> + Bren&shy;dan Gregg’s <code>flamegraph.pl</code> to eas&shy;i&shy;ly vi&shy;su&shy;al&shy;ize
+bot&shy;tle&shy;necks in the code.</p>
+</section>
+<section id="thou-shalt-not-fall-in-love-with-laziness-for-it-is-a-fickle-mistress">
+<h2>Thou shalt not fall in love with laziness, for it is a fickle mistress.</h2>
+<p>Lazi&shy;ness is awe&shy;some. When it works. And then it doesn’t. And you’re try&shy;ing to de&shy;bug
+things and putting <code>traceXXX</code> and <code>deepseq</code> ev&shy;ery&shy;where. And things still get
+print&shy;ed in a weird or&shy;der, be&shy;cause you in&shy;evitably for&shy;got to an&shy;no&shy;tate one of the guys.</p>
+<p>Lazi&shy;ness is al&shy;so not good for per&shy;for&shy;mance in a lot of cas&shy;es, apart from the
+handy fact that it makes pro&shy;grams with in&shy;fi&shy;nite struc&shy;tures ter&shy;mi&shy;nate. When&shy;ev&shy;er
+you’re deal&shy;ing with fi&shy;nite struc&shy;tures, hav&shy;ing strict&shy;ness for fields is bet&shy;ter
+in a lot of cas&shy;es. For ex&shy;am&shy;ple, <code>containers</code> us&shy;es strict&shy;ness in sev&shy;er&shy;al places
+and sev&shy;er&shy;al per&shy;for&shy;mance-ori&shy;ent&shy;ed pre&shy;sen&shy;ta&shy;tions talk about avoid lazi&shy;ness and
+its part&shy;ner-in-crime boxed fields.</p>
+</section>
+<section id="thou-shalt-not-covet-thy-neighbour-s-package-manager">
+<h2>Thou shalt not covet thy neighbour’s package manager.</h2>
+<p>Haskell has sev&shy;er&shy;al “de&shy;pen&shy;den&shy;cy man&shy;age&shy;ment so&shy;lu&shy;tions” which I guess is some&shy;where
+in be&shy;tween C++ where you’re sup&shy;posed to lose your hair try&shy;ing to get things to
+work (and once it does, refuse to up&shy;grade any&shy;thing lest it break)
+and Rust where you can prob&shy;a&shy;bly do
+<code>cargo install cargo-haircut &amp;&amp; cargo haircut</code> and have it do the ob&shy;vi&shy;ous
+with&shy;out get&shy;ting your ass off your com&shy;fy so&shy;fa.</p>
+<p>In my lit&shy;tle ex&shy;pe&shy;ri&shy;ence, while <code>stack</code> does work most of time, it suf&shy;fers from a
+lot of bloat which can cause is&shy;sues if stor&shy;age space/pro&shy;ces&shy;sor speed are not
+avail&shy;able eas&shy;i&shy;ly – I’m guess&shy;ing this is most&shy;ly a stu&shy;dent bud&shy;get/old lap&shy;top is&shy;sue
+that pro&shy;fes&shy;sion&shy;al Haskellers don’t en&shy;counter (for ref&shy;er&shy;ence, I’ve been us&shy;ing a
+Thinkpad X230 with a 256GB SSD and at some point had <code>~/.stack</code> at size
+<code>25 GB+</code>). It would be nice if <code>stack</code> of&shy;fered a clean way to unin&shy;stall things
+– since it doesn’t, the op&shy;tions left are (a) te&shy;dious: use <code>ghc-unregister</code>
+to unin&shy;stall stuff and cor&shy;re&shy;spond&shy;ing de&shy;pen&shy;den&shy;cies or (b) slow: nuke <code>~/.stack</code>,
+re&shy;run <code>stack build</code> and wait for it to re&shy;com&shy;pile the uni&shy;verse (<a class="footnote-reference brackets" href="#id7" id="id3">3</a>).</p>
+<p>On a more pos&shy;i&shy;tive note, <code>cabal new-build</code> does seem to work bet&shy;ter than
+<code>cabal sandbox</code>, so I have my fin&shy;gers crossed that healthy com&shy;pe&shy;ti&shy;tion be&shy;tween
+the projects makes both of them bet&shy;ter in the fu&shy;ture. Or the Nix hip&shy;pies be&shy;come
+our new over&shy;lords. Not be&shy;ing picky here.</p>
+</section>
+<section id="remember-the-refactor-day-to-keep-it-holy">
+<h2>Remember the refactor day, to keep it holy.</h2>
+<p>Haskell makes refac&shy;tor&shy;ing a breeze. To be more pre&shy;cise, equa&shy;tion&shy;al rea&shy;son&shy;ing
+makes refac&shy;tor&shy;ing a breeze. Refac&shy;tor&shy;ing is, in essence a process of term
+rewrit&shy;ing, and be&shy;ing able to quick&shy;ly sub&shy;sti&shy;tute like-for-like with&shy;out wor&shy;ry&shy;ing
+about state, or fac&shy;tor out com&shy;mon&shy;ly used code pieces is close to ef&shy;fort&shy;less
+in Haskell. Type in&shy;fer&shy;ence that just works is al&shy;so very handy as you don’t
+waste your time spell&shy;ing out ev&shy;ery lit&shy;tle de&shy;tail for the com&shy;pil&shy;er (just aut&shy;ofill
+the in&shy;ferred type!). Some&shy;times, the com&shy;pil&shy;er will tell you that your func&shy;tion
+is ac&shy;tu&shy;al&shy;ly more gen&shy;er&shy;al than you thought it was. Free the&shy;o&shy;rems, any&shy;one?</p>
+<p>Us&shy;ing op&shy;er&shy;a&shy;tors for com&shy;mon op&shy;er&shy;a&shy;tions proves to be handy here. I find that it
+is eas&shy;i&shy;er to do pat&shy;tern recog&shy;ni&shy;tion and rewrit&shy;ing when you’ve got a mix&shy;ture of
+op&shy;er&shy;a&shy;tors and iden&shy;ti&shy;fiers, rather than just lots of let&shy;ters and func&shy;tion
+ap&shy;pli&shy;ca&shy;tion brack&shy;ets.</p>
+</section>
+<section id="honour-thy-compiler-contributors">
+<h2>Honour thy compiler contributors.</h2>
+<p>There have been sev&shy;er&shy;al oc&shy;ca&shy;sions over the past few months where ei&shy;ther I or
+one of my team-mates en&shy;coun&shy;tered a “huh, I didn’t re&shy;alise you could do that,
+that’s so cool!” mo&shy;ment. That is prob&shy;a&shy;bly not what makes Haskell unique in my
+opin&shy;ion. What <em>does</em> make it stand it out is that I’m fair&shy;ly con&shy;fi&shy;dent that
+I’ll reg&shy;u&shy;lar&shy;ly keep hav&shy;ing that “aha!” mo&shy;ment even I keep writ&shy;ing Haskell for
+the next few years. It might be com&shy;ing from blog posts/pa&shy;pers/navel-gaz&shy;ing
+posts on r/haskell or some&shy;where else, but there’s al&shy;ways go&shy;ing to be
+in&shy;ter&shy;est&shy;ing stuff to learn.</p>
+<p>As Strous&shy;trup once said, “There are on&shy;ly two kinds of lan&shy;guages: the ones
+peo&shy;ple com&shy;plain about and the ones no&shy;body us&shy;es”. I’ve prob&shy;a&shy;bly made more than my
+fair share of com&shy;plaints here, but I must say that I’m very grate&shy;ful to all the
+peo&shy;ple who have con&shy;trib&shy;uted to GHC and the Haskell ecosys&shy;tem more gen&shy;er&shy;al&shy;ly.
+Over&shy;all, Haskell most&shy;ly feels like an awe&shy;some, co&shy;he&shy;sive whole.
+Thank you! :D</p>
+</section>
+<section id="closing-thoughts">
+<h2>Closing thoughts</h2>
+<p>Writ&shy;ing a com&shy;pil&shy;er in Haskell has been a great source of joy. 9/10 would rec&shy;om&shy;mend.</p>
+</section>
+<section id="bonus">
+<h2>Bonus</h2>
+<p>One of my big&shy;gest (ノಠ益ಠ)ノ彡┻━┻ mo&shy;ments over the past few months -
+<a href="https://ghc.haskell.org/trac/ghc/ticket/8695">Trac 8695</a>.</p>
+<p>Al&shy;so, I couldn’t fig&shy;ure out how to fit <code>intero</code>, <code>hoogle</code> and <code>hlint</code> in&shy;to
+the nar&shy;ra&shy;tive here but all of them de&shy;serve a shout-out.
+<code>intero</code> does its best to pro&shy;vide live type in&shy;for&shy;ma&shy;tion in Spacemacs (un&shy;til
+some TH heavy code kills its per&shy;for&shy;mance).
+<code>hoogle</code> is google but for Haskell, search&shy;ing type sig&shy;na&shy;tures is a breeze.
+<code>hlint</code> does sim&shy;ple equa&shy;tion&shy;al rea&shy;son&shy;ing and pro&shy;vide many help&shy;ful sug&shy;ges&shy;tions
+for clear&shy;er code. All these tools are awe&shy;some! (<a class="footnote-reference brackets" href="#id9" id="id4">5</a>)</p>
+<section id="footnotes">
+<h3>Footnotes</h3>
+<dl class="footnote brackets">
+<dt class="label" id="id5"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd>Here “com&shy;pose” refers to the fact that you can mix and match stuff, not lit&shy;er&shy;al func&shy;tion
+com&shy;po&shy;si&shy;tion, al&shy;though I guess you could do the lat&shy;ter too.</dd>
+<dt class="label" id="id6"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd>Per&shy;haps li&shy;brary au&shy;thors are tak&shy;ing Wadler’s words a bit too se&shy;ri&shy;ous&shy;ly?</dd>
+<dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd>Not sure if I was imag&shy;in&shy;ing it but I rec&shy;ol&shy;lect my ter&shy;mi&shy;nal beep&shy;ing when I was tran&shy;si&shy;tive&shy;ly
+in&shy;stalling <code>lens</code> for the fifti&shy;eth time.</dd>
+<dt class="label" id="id8"><span class="brackets">4</span></dt>
+<dd><p>I’m not against sub&shy;typ&shy;ing/in&shy;her&shy;i&shy;tance as a con&shy;cept. In my lit&shy;tle ex&shy;pe&shy;ri&shy;ence, the prob&shy;lem
+is that for high&shy;er-lev&shy;el prob&shy;lems (code or&shy;ga&shy;ni&shy;za&shy;tion etc.) it is eas&shy;i&shy;er to slip in&shy;to the trap
+of adding just a lit&shy;tle bit of more of mu&shy;ta&shy;tion/state&shy;ful&shy;ness/in&shy;tru&shy;sive&shy;ness etc.</p>
+<p>Once you’ve done that, there is in&shy;creased hes&shy;is&shy;tance in chang&shy;ing large amounts of code as
+many in&shy;vari&shy;ants are not en&shy;cod&shy;ed in the type sys&shy;tem but in com&shy;ments or in lost mem&shy;o&shy;ries.
+Hav&shy;ing read mul&shy;ti&shy;ple books geared to&shy;wards OO pro&shy;gram&shy;mers re&shy;gard&shy;ing code hy&shy;giene, best prac&shy;tices,
+and de&shy;sign pat&shy;terns, I’ve found the giv&shy;en ad&shy;vice to be ei&shy;ther triv&shy;ial&shy;ly ob&shy;vi&shy;ous, not re&shy;al&shy;ly
+mak&shy;ing sense, or over&shy;ly com&shy;pli&shy;cat&shy;ed/time-con&shy;sum&shy;ing to en&shy;force by hand.
+While these of&shy;ten em&shy;pha&shy;size test&shy;ing, which can cer&shy;tain&shy;ly com&shy;ple&shy;ment refac&shy;tor&shy;ing and give you
+more con&shy;fi&shy;dence that you’re main&shy;tain&shy;ing in&shy;vari&shy;ants cor&shy;rect&shy;ly, it can&shy;not be a sub&shy;sti&shy;tute for
+hav&shy;ing strong types – the cost of main&shy;tain&shy;ing that many tests is just too high.</p>
+</dd>
+<dt class="label" id="id9"><span class="brackets"><a class="fn-backref" href="#id4">5</a></span></dt>
+<dd>I wish we (the Haskell com&shy;mu&shy;ni&shy;ty) would spend more ef&shy;fort in get&shy;ting tool&shy;ing in&shy;to the hands
+of be&shy;gin&shy;ners right away, not just GH&shy;Ci. It re&shy;al&shy;ly makes for a big qual&shy;i&shy;ty-of-life im&shy;prove&shy;ment.
+Users from oth&shy;er lan&shy;guages may not even re&shy;al&shy;ize that such tools could/do ex&shy;ist, so they might
+not go seek them in the first place.</dd>
+</dl>
+</section>
+</section>
+<!-- /content -->
+      <footer>
+        <p>Posted by <a href="https://theindigamer.github.io/author/varun-gandhi.html">Varun Gandhi</a> on <time datetime="2018-06-30T00:00:00-05:00">Sat 30 June 2018</time> in <a href="https://theindigamer.github.io/category/programming.html">programming</a>. Tags: <a href="https://theindigamer.github.io/tag/haskell.html">haskell</a>, <a href="https://theindigamer.github.io/tag/compiler.html">compiler</a>.</p>
+      </footer>
+    </article>
+    <nav class="m-navpanel m-col-m-2">
+      <h3>Cat&shy;e&shy;gories</h3>
+      <ol class="m-block-bar-m">
+        <li><a href="https://theindigamer.github.io/category/fiction.html">fic&shy;tion</a></li>
+        <li><a href="https://theindigamer.github.io/category/grad-school.html">grad school</a></li>
+        <li><a href="https://theindigamer.github.io/category/misc.html">misc</a></li>
+        <li><a href="https://theindigamer.github.io/category/movies.html">movies</a></li>
+        <li><a href="https://theindigamer.github.io/category/programming.html">pro&shy;gram&shy;ming</a></li>
+      </ol>
+      <h3>Tag cloud</h3>
+      <ul class="m-tagcloud">
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/compiler.html">compiler</a></li>
+        <li class="m-tag-5"><a href="https://theindigamer.github.io/tag/haskell.html">haskell</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/languages.html">languages</a></li>
+        <li class="m-tag-5"><a href="https://theindigamer.github.io/tag/math.html">math</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/ocaml.html">ocaml</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/ordinals.html">ordinals</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/piet.html">piet</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/programming.html">programming</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/project-euler.html">project euler</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/python.html">python</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/rust.html">rust</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/spirited-away.html">spirited away</a></li>
+        <li class="m-tag-3"><a href="https://theindigamer.github.io/tag/studio-ghibli.html">studio ghibli</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+</main>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Copy&shy;right © 2017
+        Varun Gand&shy;hi
+        - Text li&shy;censed un&shy;der <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY SA 4.0</a>
+        and Code li&shy;censed un&shy;der <a href="https://opensource.org/licenses/MIT">MIT</a>
+        un&shy;less ex&shy;plic&shy;it&shy;ly stat&shy;ed oth&shy;er&shy;wise
+        - Pow&shy;ered by <a href="https://getpelican.com">Pel&shy;i&shy;can</a> and
+        <a href="http://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
